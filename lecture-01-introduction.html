@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Great Mental Models of AI · Lecture One</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Permanent+Marker&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFFFFF; --ink:#1A1A1A; --muted:#565656; --faint:#9B9B9B;
+    --accent:#C0392B; --line:#ECECEC; --maxw:720px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:Inter,system-ui,sans-serif; font-size:18px; line-height:1.75; -webkit-font-smoothing:antialiased}
+  .mk{font-family:'Permanent Marker',cursive; font-weight:400}
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 28px}
+  .bar{position:fixed; top:0; left:0; height:3px; width:0; background:var(--accent); z-index:50}
+  .rule{height:1px; background:var(--line); border:0; margin:0}
+
+  header{min-height:88vh; display:flex; flex-direction:column; justify-content:center; padding:7vh 0 5vh}
+  .kicker{font-family:'Permanent Marker',cursive; font-size:15px; letter-spacing:.05em; color:var(--accent)}
+  h1{font-family:'Permanent Marker',cursive; font-weight:400; font-size:clamp(40px,7.4vw,70px); line-height:1.08; margin:.7rem 0 0}
+  h1 .red{color:var(--accent)}
+  .sub{font-size:19px; color:var(--muted); margin-top:1.6rem; max-width:34ch}
+  .scrollcue{font-family:'Permanent Marker',cursive; margin-top:3rem; font-size:15px; color:var(--faint)}
+
+  section{padding:3rem 0}
+  .lede p{margin:0 0 1.35rem; font-size:20px}
+  .drop::first-letter{font-family:'Permanent Marker',cursive; float:left; font-size:3.3em; line-height:.82; padding:.06em .14em 0 0; color:var(--accent)}
+
+  .movements p{margin:.2rem 0; font-size:19px}
+  .movements .v{font-family:'Permanent Marker',cursive; color:var(--accent); margin-right:.5rem}
+
+  .vol{display:flex; align-items:center; gap:16px; margin:4.2rem 0 .6rem}
+  .vol .ln{flex:1; height:2px; background:var(--ink); opacity:.1}
+  .vol .tag{font-family:'Permanent Marker',cursive; font-size:21px}
+  .vol .tag b{color:var(--accent); font-weight:400}
+
+  .model{padding:2.4rem 0}
+  .idx{font-family:'Permanent Marker',cursive; font-size:18px; color:var(--faint)}
+  .model h2{font-family:'Permanent Marker',cursive; font-weight:400; font-size:clamp(27px,4.6vw,38px); line-height:1.1; margin:.15rem 0 .35rem}
+  .move{font-family:'Permanent Marker',cursive; font-size:18px; color:var(--accent); margin:.1rem 0 1.25rem; line-height:1.45}
+  .model p{margin:0 0 1.1rem}
+
+  .fields{display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin:1.5rem 0 .5rem}
+  .fields div{border-top:3px solid var(--accent); padding-top:.6rem}
+  .fields h4{font-family:'Permanent Marker',cursive; font-weight:400; font-size:16px; margin:0 0 .3rem}
+  .fields p{margin:0; font-size:15px; color:var(--muted); line-height:1.55}
+  @media(max-width:560px){.fields{grid-template-columns:1fr}}
+
+  figure{margin:2.2rem 0 0}
+  figure img{display:block; width:100%; max-width:580px; margin:0 auto; height:auto}
+  .fig-missing{display:none; max-width:580px; margin:0 auto; border:2px dashed var(--line); border-radius:10px; padding:3rem 1rem; text-align:center; color:var(--faint); font-family:'Permanent Marker',cursive; font-size:16px}
+
+  .closing p{margin:0 0 1.25rem; font-size:20px}
+  footer{padding:5rem 0 7rem; text-align:center}
+  footer .next{font-family:'Permanent Marker',cursive; font-size:22px; color:var(--accent)}
+  footer .sig{margin-top:1.1rem; font-family:'Permanent Marker',cursive; font-size:14px; letter-spacing:.04em; color:var(--faint)}
+
+  .reveal{opacity:0; transform:translateY(16px); transition:opacity .8s ease, transform .8s ease}
+  .reveal.in{opacity:1; transform:none}
+  @media(prefers-reduced-motion:reduce){.reveal{opacity:1; transform:none; transition:none}}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+
+<header class="wrap">
+  <div class="kicker reveal">The Great Mental Models of Artificial Intelligence</div>
+  <h1 class="reveal">The ideas that taught<br>machines to <span class="red">think</span></h1>
+  <div class="sub reveal">Lecture one — a love letter to the field, in fifteen ideas.</div>
+  <div class="scrollcue reveal">Scroll slowly ↓</div>
+</header>
+
+<hr class="rule">
+
+<section class="wrap">
+  <div class="lede reveal">
+    <p class="drop">In 1958, a psychologist named Frank Rosenblatt built a machine the size of a room that could learn to tell its left from its right. When it worked, the newspapers said it was the beginning of a computer that would one day walk, talk, see, and write itself into existence. People laughed. They were right to laugh — and, it turns out, they were wrong to.</p>
+    <p>This series is about the ideas underneath that long, strange, beautiful road. Not the equations — the ideas. It borrows a habit of mind that Farnam Street made famous: that you don't need ten thousand facts, you need a few dozen models that keep showing up everywhere you look.</p>
+    <p>Here is the claim I'll spend the whole series defending. Almost every great moment in artificial intelligence is one of fifteen ideas, wearing a new coat. Learn the fifteen, and history stops being a list of names to memorize. It becomes a set of moves — moves you can make yourself, the next time you face a problem no one has solved.</p>
+  </div>
+</section>
+
+<div class="wrap"><figure class="reveal"><img class="fig" src="figures/models/16-perceptron-1958.png" alt="The Perceptron, 1958"><div class="fig-missing">figure generating…</div></figure></div>
+
+<section class="wrap movements reveal">
+  <div class="kicker" style="color:var(--muted)">The journey, in five movements</div>
+  <div style="margin-top:1.3rem">
+    <p><span class="v">I</span> Learning — how we taught a machine to teach itself.</p>
+    <p><span class="v">II</span> Representation — how meaning gets turned into something a machine can hold.</p>
+    <p><span class="v">III</span> Generation &amp; uncertainty — how a machine learns to create, and to live with not knowing.</p>
+    <p><span class="v">IV</span> Architecture &amp; composition — how we build minds out of simple, repeated parts.</p>
+    <p><span class="v">V</span> Scale, reuse &amp; practice — how all of it grows up and goes to work.</p>
+  </div>
+</section>
+
+<div class="wrap"><div class="vol reveal"><span class="tag"><b>Volume I</b> Learning</span><span class="ln"></span></div></div>
+<div class="wrap">
+  <article class="model reveal">
+    <div class="idx">01</div>
+    <h2>Gradient Handoff</h2>
+    <div class="move">When you can't write the rule, describe the goal — and let the gradient find it.</div>
+    <p>For thirty years we tried to write intelligence down by hand. Rosenblatt tuned his perceptron's weights one at a time, a human deciding each turn of the dial. It was slow, it was human, and it hit a wall. Then, in 1986, a small group — Rumelhart, Hinton, Williams — gave a clear voice to an old trick: don't write the rule, describe what "better" looks like and let the machine roll downhill toward it. That roll downhill is gradient descent.</p>
+    <p>Ever since, whenever we couldn't see the rule ourselves, we handed it to the gradient. We stopped writing equations. We started writing wishes — and trusting the slope to grant them.</p>
+    <div class="fields">
+      <div><h4>Vision</h4><p>We couldn't say what makes a cat a cat. So the network found the edges and whiskers itself. (LeCun's digit reader, 1989.)</p></div>
+      <div><h4>Language</h4><p>We couldn't write the rule for which words matter to which. So attention learned it. (The Transformer, 2017.)</p></div>
+      <div><h4>Reasoning</h4><p>We couldn't script the winning move. So AlphaGo played itself millions of times — and found moves no human had. (2016.)</p></div>
+    </div>
+    <figure><img class="fig" src="figures/models/01-gradient-handoff.png" alt="Gradient Handoff — a ball rolling down a curve toward the goal"><div class="fig-missing">figure generating…</div></figure>
+    <figure><img class="fig" src="figures/models/17-handoff-vision.png" alt="Vision — the network found the features itself"><div class="fig-missing">figure generating…</div></figure>
+    <figure><img class="fig" src="figures/models/18-handoff-language.png" alt="Language — attention learned which words matter"><div class="fig-missing">figure generating…</div></figure>
+    <figure><img class="fig" src="figures/models/19-handoff-reasoning.png" alt="Reasoning — AlphaGo found new moves"><div class="fig-missing">figure generating…</div></figure>
+  </article>
+
+  <article class="model reveal">
+    <div class="idx">02</div>
+    <h2>Predict the Part, Learn the Whole</h2>
+    <div class="move">Optimise a humble little task; the real understanding arrives as a side effect.</div>
+    <p>Here is a magic trick the field stumbled into. Hide the last word of a sentence and ask a machine to guess it. "The clouds drifted across the ____." To guess sky, and to keep guessing well across a trillion sentences, it has to quietly learn grammar, weather, geography, even a little poetry — the whole shape of a language.</p>
+    <p>We only ever asked for the next word. We got a model of the world for free. Every large language model alive today is this one humble trick, run at an unimaginable scale.</p>
+    <figure><img class="fig" src="figures/models/02-predict-the-part.png" alt="Predict the Part, Learn the Whole"><div class="fig-missing">figure generating…</div></figure>
+    <figure><img class="fig" src="figures/models/20-next-token-magic.png" alt="Predict the part — grammar, weather, geography fall out for free"><div class="fig-missing">figure generating…</div></figure>
+  </article>
+</div>
+
+<div class="wrap"><div class="vol reveal"><span class="tag"><b>Volume II</b> Representation</span><span class="ln"></span></div></div>
+<div class="wrap">
+  <article class="model reveal">
+    <div class="idx">03</div>
+    <h2>Everything Is a Vector</h2>
+    <div class="move">Turn anything into a point in space, and meaning becomes a distance you can measure.</div>
+    <p>In 2013, a team at Google did something that still feels like sorcery. They turned words into long lists of numbers — points in space — arranged so that king minus man plus woman landed almost exactly on queen. Meaning had become geometry. You could do arithmetic on ideas.</p>
+    <p>Soon images, sounds, and entire videos joined the same space. For the first time, a photograph and the sentence that describes it could be neighbours — close enough to find each other in the dark.</p>
+    <figure><img class="fig" src="figures/models/03-everything-is-a-vector.png" alt="Everything Is a Vector — king minus man plus woman equals queen"><div class="fig-missing">figure generating…</div></figure>
+    <figure><img class="fig" src="figures/models/21-word2vec-google.png" alt="Google 2013 — meaning became geometry"><div class="fig-missing">figure generating…</div></figure>
+  </article>
+
+  <article class="model reveal">
+    <div class="idx">04</div>
+    <h2>Compression</h2>
+    <div class="move">Force the world through a narrow gap; what survives is what mattered.</div>
+    <p>A good description is a short one. To squeeze a human face down to a few hundred numbers and rebuild it again, a machine has to throw away the freckles-that-don't-matter and keep the essence — the geometry of a face, not its pixels. That narrow gap in the middle is where understanding happens.</p>
+    <p>It is the quiet engine inside autoencoders, and the same instinct that let one modern lab shrink a model's memory to a fraction of its size without it losing its mind. To understand something deeply is, in the end, to be able to say it briefly.</p>
+    <figure><img class="fig" src="figures/models/04-compression.png" alt="Compression — many inputs squeezed to an essence and expanded back"><div class="fig-missing">figure generating…</div></figure>
+    <figure><img class="fig" src="figures/models/22-compression-vision-encoder.png" alt="Compression — the vision encoder"><div class="fig-missing">figure generating…</div></figure>
+    <figure><img class="fig" src="figures/models/23-compression-mla.png" alt="Compression — multi-head latent attention (DeepSeek MLA)"><div class="fig-missing">figure generating…</div></figure>
+  </article>
+
+  <article class="model reveal">
+    <div class="idx">05</div>
+    <h2>Expressivity</h2>
+    <div class="move">When the answer won't fit, go up a dimension — give the knot room to come undone.</div>
+    <p>Some problems simply cannot be solved on the page they're written on. Picture two tangled spirals of dots, impossible to separate with any straight line. Now lift them off the page into a higher dimension — and suddenly a flat sheet can slide cleanly between them. The knot was never really a knot. It just needed more room.</p>
+    <p>This is the mirror image of compression: where compression goes down to find the essence, expressivity climbs up to find the answer. A neural network spends its early layers doing exactly this — lifting the world into bigger rooms where the tangles fall apart.</p>
+    <figure><img class="fig" src="figures/models/05-expressivity.png" alt="Expressivity — tangled points separated after lifting"><div class="fig-missing">figure generating…</div></figure>
+  </article>
+</div>
+
+<div class="wrap"><div class="vol reveal"><span class="tag"><b>Volume III</b> Generation &amp; uncertainty</span><span class="ln"></span></div></div>
+<div class="wrap">
+  <article class="model reveal">
+    <div class="idx">06</div>
+    <h2>Reverse the Corruption</h2>
+    <div class="move">Learn to undo destruction, step by step, and you have secretly learned to create.</div>
+    <p>Take a photograph and add a little static. Add a little more. Keep going until nothing is left but snow — a screen of pure noise. Now teach a machine to undo just one step of that ruin. Do that well enough, and you can hand it a screen of pure noise and ask it to walk all the way back — into a photograph that never existed.</p>
+    <p>That is diffusion. Every image these models dream up is a storm being run, patiently, backwards into order.</p>
+    <figure><img class="fig" src="figures/models/06-reverse-the-corruption.png" alt="Reverse the Corruption — order degrading into noise, run backward"><div class="fig-missing">figure generating…</div></figure>
+  </article>
+
+  <article class="model reveal">
+    <div class="idx">07</div>
+    <h2>Pit Two Systems Against Each Other</h2>
+    <div class="move">Set two systems against each other, and let the arms race lift them both.</div>
+    <p>In 2014, over a beer, Ian Goodfellow had an idea: let a forger and a detective face off. One makes fake images; the other calls them out. Each one's failure becomes the other's lesson. Round after round, the forgeries get good enough to fool anyone alive.</p>
+    <p>That same duel is everywhere now — a model and its critic, a player and its own reflection, an answer and a challenge to it. Rivalry, it turns out, is one of the great teachers.</p>
+    <figure><img class="fig" src="figures/models/07-pit-two-systems.png" alt="Pit Two Systems Against Each Other — forger versus detective loop"><div class="fig-missing">figure generating…</div></figure>
+  </article>
+
+  <article class="model reveal">
+    <div class="idx">08</div>
+    <h2>Entropy</h2>
+    <div class="move">Surprise is not a mood — it is a number, and you can turn the dial.</div>
+    <p>Every time a language model speaks, it rolls a loaded die. How loaded is set by a single knob borrowed straight from physics: temperature. Turn it down and the model becomes careful, predictable, a little dull. Turn it up and it gets surprising, strange, occasionally brilliant.</p>
+    <p>Entropy is just a measure of surprise. A century after Boltzmann named it for steam engines, the very same idea quietly governs how a machine chooses its next word.</p>
+    <figure><img class="fig" src="figures/models/08-entropy.png" alt="Entropy — a peaked low-temperature distribution versus a flat high-temperature one"><div class="fig-missing">figure generating…</div></figure>
+  </article>
+
+  <article class="model reveal">
+    <div class="idx">09</div>
+    <h2>Everything Is a Distribution</h2>
+    <div class="move">Don't predict a point; predict a cloud, and carry your uncertainty with you.</div>
+    <p>A machine that quietly knows it might be wrong is worth more than one that is loudly, confidently certain. So modern AI rarely hands you a single answer. It hands you a cloud — a spread of possibilities, each with a confidence attached.</p>
+    <p>From that cloud you can sample a sentence, rank a diagnosis, or — most precious of all — admit that you simply don't know. It is doubt, made into mathematics.</p>
+    <figure><img class="fig" src="figures/models/09-everything-is-a-distribution.png" alt="Everything Is a Distribution — a single point becoming a probability curve"><div class="fig-missing">figure generating…</div></figure>
+  </article>
+</div>
+
+<div class="wrap"><div class="vol reveal"><span class="tag"><b>Volume IV</b> Architecture &amp; composition</span><span class="ln"></span></div></div>
+<div class="wrap">
+  <article class="model reveal">
+    <div class="idx">10</div>
+    <h2>Composition</h2>
+    <div class="move">Build minds the way nature does — simple parts, stacked into hierarchy.</div>
+    <p>The deepest idea in architecture is also the simplest one: stack. One small layer learns to see edges. Stack a second on top and it sees textures; a third, eyes and wheels; a fourth, whole faces and cars. Nothing in the stack is clever on its own. The intelligence lives in the height.</p>
+    <p>The Transformer — the engine of this entire era — is, at heart, one modest block, copied and stacked a hundred times. We did not design a mind. We designed a brick, and then we built upward.</p>
+    <figure><img class="fig" src="figures/models/10-composition.png" alt="Composition — identical blocks stacked, growing in abstraction"><div class="fig-missing">figure generating…</div></figure>
+  </article>
+
+  <article class="model reveal">
+    <div class="idx">11</div>
+    <h2>Specialization</h2>
+    <div class="move">Don't make everything do everything — route each problem to its specialist.</div>
+    <p>Why should every part of a brain do every job? The newest large models don't. They keep a quiet council of experts and, for each word that passes through, call on only the few who know best — a poet here, an accountant there, a grammarian for the comma.</p>
+    <p>Most of the model is asleep at any given moment. That is the trick that lets a system be enormous and fast at the very same time.</p>
+    <figure><img class="fig" src="figures/models/11-specialization.png" alt="Specialization — an input routed to one chosen expert"><div class="fig-missing">figure generating…</div></figure>
+  </article>
+</div>
+
+<div class="wrap"><div class="vol reveal"><span class="tag"><b>Volume V</b> Scale, reuse &amp; practice</span><span class="ln"></span></div></div>
+<div class="wrap">
+  <article class="model reveal">
+    <div class="idx">12</div>
+    <h2>More Is Different</h2>
+    <div class="move">Scale doesn't just improve a thing — past a threshold, it changes its kind.</div>
+    <p>For a long time, bigger only meant a little better. And then, past some invisible line, the models began to do things no one had trained them to do — follow instructions, reason in steps, translate languages they had barely seen.</p>
+    <p>The physicist Philip Anderson gave this its name in 1972: more is different. Enough water molecules don't make a bigger droplet; at some point they make ice. Quantity, pushed far enough, becomes a difference in quality.</p>
+    <figure><img class="fig" src="figures/models/12-more-is-different.png" alt="More Is Different — a capability curve that jumps at scale"><div class="fig-missing">figure generating…</div></figure>
+  </article>
+
+  <article class="model reveal">
+    <div class="idx">13</div>
+    <h2>Learn Once, Adapt Everywhere</h2>
+    <div class="move">Pour everything into one base — then adapt it cheaply, forever.</div>
+    <p>It would be madness to raise a brand-new mind from scratch for every small task. So we don't. We train one enormous model on the whole library of the internet, once, at staggering cost — and then everyone adapts that single foundation with the gentlest nudge: a few examples, a short prompt, a light touch.</p>
+    <p>The hard, expensive part is paid exactly once. The rest of us simply inherit it. This is the quiet meaning of the phrase "foundation model."</p>
+    <figure><img class="fig" src="figures/models/13-learn-once-adapt-everywhere.png" alt="Learn Once, Adapt Everywhere — one base branching into many tasks"><div class="fig-missing">figure generating…</div></figure>
+  </article>
+
+  <article class="model reveal">
+    <div class="idx">14</div>
+    <h2>The Tea Kettle Principle</h2>
+    <div class="move">Don't solve the new problem — reduce it to one already solved.</div>
+    <p>There's an old joke about a mathematician. Asked to boil a kettle already full of water, he first pours the water out — so as to reduce the task to one he has solved before. AI does this constantly, and shamelessly.</p>
+    <p>To serve today's giant models quickly, engineers reached back for paging — a trick operating systems used to juggle memory in the 1960s. A brand-new problem, met with a fifty-year-old answer, lifted whole across the gap between two fields. The best move is often not invention. It is recognition.</p>
+    <figure><img class="fig" src="figures/models/14-tea-kettle-principle.png" alt="The Tea Kettle Principle — a new problem slotting into a solved one"><div class="fig-missing">figure generating…</div></figure>
+  </article>
+
+  <article class="model reveal">
+    <div class="idx">15</div>
+    <h2>The Elephant and the Ship</h2>
+    <div class="move">There is no single right vantage point — collect perspectives until the whole appears.</div>
+    <p>Six blind men meet an elephant. One holds the trunk and says snake; one the broad leg, tree; one the ear, fan. Each man is honest. Each is wrong. And only together, with all their partial truths laid side by side, does the animal finally appear.</p>
+    <p>Every hard problem in AI — and every real project you will ever ship — is an elephant. The work is not to find the one true view. It is to gather enough partial views that the whole creature steps out of the dark.</p>
+    <figure><img class="fig" src="figures/models/15-elephant-and-ship.png" alt="The Elephant and the Ship — an elephant touched at three different points"><div class="fig-missing">figure generating…</div></figure>
+  </article>
+</div>
+
+<hr class="rule" style="margin-top:3rem">
+
+<section class="wrap">
+  <div class="closing reveal">
+    <p>That is the map. Fifteen ideas, five movements, one long love affair with a single question: how does thinking work?</p>
+    <p>And here is what I hope you'll take from it. These are not facts to file away. They are tools. The next time you face a problem no one has solved — in your research, in your company, in a quiet notebook at midnight — you can run down the list and ask: is this a place to hand it to the gradient? To compress? To reverse a corruption? To reduce it to something already solved? The history of AI is not behind glass. It is a box of moves, and the box is open.</p>
+    <p>In the lectures to come we'll take them one at a time, slowly, with all the history and all the mathematics they deserve. But today I only wanted you to see the shape of the whole thing.</p>
+  </div>
+</section>
+
+<footer class="wrap reveal">
+  <div class="next">Next time — we begin where the field began: with the gradient.</div>
+  <div class="sig">The Great Mental Models of Artificial Intelligence</div>
+</footer>
+
+<script>
+  var bar = document.getElementById('bar');
+  function onScroll(){ var h=document.documentElement; bar.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%'; }
+  document.addEventListener('scroll', onScroll, {passive:true}); onScroll();
+  var io = new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} }); }, {threshold:0.1, rootMargin:'0px 0px -6% 0px'});
+  document.querySelectorAll('.reveal').forEach(function(el){ io.observe(el); });
+  document.querySelectorAll('img.fig').forEach(function(img){
+    img.addEventListener('error', function(){ img.style.display='none'; var p=img.nextElementSibling; if(p) p.style.display='block'; });
+  });
+</script>
+</body>
+</html>
