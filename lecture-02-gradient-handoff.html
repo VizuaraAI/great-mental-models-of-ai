@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gradient Handoff · The Great Mental Models of AI · Lecture Two</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Permanent+Marker&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFFFFF; --ink:#1A1A1A; --muted:#565656; --faint:#9B9B9B;
+    --accent:#C0392B; --accent-soft:#F4E2DE; --line:#ECECEC; --gray:#D9D9D6; --maxw:720px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:Inter,system-ui,sans-serif; font-size:18px; line-height:1.78; -webkit-font-smoothing:antialiased}
+  .mk{font-family:'Permanent Marker',cursive; font-weight:400}
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 28px}
+  .bar{position:fixed; top:0; left:0; height:3px; width:0; background:var(--accent); z-index:50}
+  .rule{height:1px; background:var(--line); border:0; margin:0}
+  a{color:var(--accent)}
+
+  header{min-height:90vh; display:flex; flex-direction:column; justify-content:center; padding:7vh 0 5vh}
+  .kicker{font-family:'Permanent Marker',cursive; font-size:14px; letter-spacing:.04em; color:var(--accent)}
+  h1{font-family:'Permanent Marker',cursive; font-weight:400; font-size:clamp(44px,8vw,76px); line-height:1.06; margin:.7rem 0 0}
+  h1 .red{color:var(--accent)}
+  .sub{font-size:20px; color:var(--muted); margin-top:1.6rem; max-width:40ch}
+  .scrollcue{font-family:'Permanent Marker',cursive; margin-top:3rem; font-size:15px; color:var(--faint)}
+
+  section{padding:2.6rem 0}
+  .sec-kicker{font-family:'Permanent Marker',cursive; font-size:15px; color:var(--faint)}
+  h2{font-family:'Permanent Marker',cursive; font-weight:400; font-size:clamp(28px,4.8vw,40px); line-height:1.1; margin:.2rem 0 1.1rem}
+  h3{font-family:'Permanent Marker',cursive; font-weight:400; font-size:21px; margin:1.8rem 0 .4rem}
+  p{margin:0 0 1.15rem}
+  .lead{font-size:20px}
+  .drop::first-letter{font-family:'Permanent Marker',cursive; float:left; font-size:3.3em; line-height:.82; padding:.06em .14em 0 0; color:var(--accent)}
+  .eq{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.92em; background:#F6F4F1; border:1px solid var(--line); border-radius:6px; padding:.08em .4em; white-space:nowrap}
+  .eqblock{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:15px; background:#F6F4F1; border:1px solid var(--line); border-radius:10px; padding:.9rem 1rem; margin:1.2rem 0; overflow-x:auto; line-height:1.9}
+  .eqblock b{color:var(--accent); font-weight:600}
+  .code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:14px; background:#F6F4F1; border:1px solid var(--line); border-left:3px solid var(--gray); border-radius:0 8px 8px 0; padding:.9rem 1.1rem; margin:1.2rem 0; white-space:pre; overflow-x:auto; color:#333; line-height:1.65}
+  .code .c{color:#9B9B9B}
+
+  .vol{display:flex; align-items:center; gap:16px; margin:4rem 0 .4rem}
+  .vol .ln{flex:1; height:2px; background:var(--ink); opacity:.1}
+  .vol .tag{font-family:'Permanent Marker',cursive; font-size:18px; color:var(--accent)}
+
+  figure{margin:2rem 0 .4rem}
+  figure img{display:block; width:100%; max-width:600px; margin:0 auto; height:auto}
+  figcaption{font-size:13px; color:var(--faint); text-align:center; margin-top:.5rem; max-width:46ch; margin-left:auto; margin-right:auto}
+  .fig-missing{display:none; max-width:600px; margin:0 auto; border:2px dashed var(--line); border-radius:10px; padding:3rem 1rem; text-align:center; color:var(--faint); font-family:'Permanent Marker',cursive}
+
+  .thesis{border:2px solid var(--accent); border-radius:16px; padding:1.4rem 1.6rem; margin:2rem 0; background:#fff}
+  .thesis .t{font-family:'Permanent Marker',cursive; color:var(--accent); font-size:18px; margin-bottom:.5rem}
+  .thesis p{margin:0; font-size:19px}
+  .takeaway{background:var(--accent-soft); border-radius:16px; padding:1.4rem 1.6rem; margin:2rem 0}
+  .takeaway .t{font-family:'Permanent Marker',cursive; font-size:16px; color:var(--accent); margin-bottom:.4rem}
+  .takeaway p{margin:0}
+
+  /* hand-built animations */
+  .anim{width:100%; max-width:440px; height:auto; display:block; margin:1.8rem auto .2rem}
+  .acc{fill:none; stroke:var(--accent); stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round}
+  .ink{fill:none; stroke:var(--ink); stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round}
+  .thin{fill:none; stroke:var(--faint); stroke-width:1}
+  .accf{fill:var(--accent)} .grayf{fill:var(--gray); stroke:#bdb6a8; stroke-width:1} .inkf{fill:var(--ink)}
+  .alab{font-family:'Permanent Marker',cursive; font-size:12px; fill:var(--muted)}
+  .draw{stroke-dasharray:900; stroke-dashoffset:900}
+  .reveal.in .draw{animation:draw 2.2s ease forwards}
+  .reveal.in .draw.d2{animation-delay:.5s}
+  .reveal.in .draw.d3{animation-delay:1s}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  .gd-ball{offset-path:path('M30 40 Q200 250 370 40'); animation:roll 3.6s cubic-bezier(.45,0,.55,1) infinite}
+  @keyframes roll{0%{offset-distance:0%}55%{offset-distance:50%}100%{offset-distance:50%}}
+  .knob{transform-origin:center; animation:turn 4s ease-in-out infinite}
+  @keyframes turn{0%{transform:rotate(-115deg)}50%{transform:rotate(115deg)}100%{transform:rotate(-115deg)}}
+  .pline{transform-origin:150px 105px; animation:rot 6s ease-in-out infinite}
+  @keyframes rot{0%{transform:rotate(62deg)}55%{transform:rotate(-18deg)}100%{transform:rotate(-18deg)}}
+  .fitcurve{animation:none}
+
+  .reveal{opacity:0; transform:translateY(16px); transition:opacity .8s ease, transform .8s ease}
+  .reveal.in{opacity:1; transform:none}
+  @media(prefers-reduced-motion:reduce){.reveal{opacity:1; transform:none; transition:none} .gd-ball,.knob,.pline,.draw,.fitcurve [*]{animation:none!important}}
+  footer{padding:5rem 0 7rem; text-align:center}
+  footer .next{font-family:'Permanent Marker',cursive; font-size:22px; color:var(--accent)}
+  footer .sig{margin-top:1.1rem; font-family:'Permanent Marker',cursive; font-size:14px; color:var(--faint)}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+
+<header class="wrap">
+  <div class="kicker reveal">The Great Mental Models of Artificial Intelligence · Lecture Two</div>
+  <h1 class="reveal">Gradient <span class="red">Handoff</span></h1>
+  <div class="sub reveal">When you can't write the rule, hand the search to the gradient. A deep visual walk — from a virus in New York to the attention inside Claude.</div>
+  <div class="scrollcue reveal">Scroll slowly ↓</div>
+</header>
+<hr class="rule">
+
+<!-- 1 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">One · the question</div>
+  <h2>It started with a curve</h2>
+  <p class="lead drop">Spring, 2020. New York City. Every morning a number arrived, and every morning it was bigger than the day before. One infected person became ten, ten became a hundred, a hundred became a thousand. On a map of the city, a few red dots bloomed into a rash that spread borough to borough.</p>
+  <p>Behind that rising line sat a single, terrifying question — the only question that really mattered to the doctors and the people running the city: <em>what does tomorrow look like?</em> If you could take "what day is it?" and turn it into "how many people will be infected," you could decide how many beds to build, when to lock down, whether the wave was cresting or just beginning.</p>
+  <p>So that is the little machine we need: something you feed a day, and it hands you back a number of infected. This whole lecture is about the two completely different ways humanity learned to build that machine — and why the second way, the strange and almost lazy one, quietly took over the world.</p>
+  <figure class="reveal">
+    <svg viewBox="0 0 440 200" class="anim" role="img" aria-label="Infections rising over time">
+      <line x1="40" y1="170" x2="420" y2="170" class="thin"/><line x1="40" y1="20" x2="40" y2="170" class="thin"/>
+      <text x="200" y="192" class="alab">time</text><text x="6" y="100" class="alab" transform="rotate(-90 12 100)">infected</text>
+      <path class="acc draw" d="M44 168 C140 165 210 150 270 110 S360 30 414 26"/>
+    </svg>
+    <figcaption>The only data we start with: infections, climbing.</figcaption>
+  </figure>
+  <figure class="reveal"><img class="fig" src="figures/l2/l2-01-covid-newyork.png" alt="The infected are rising — New York, spring 2020"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 2 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Two · the first way</div>
+  <h2>Build it from understanding</h2>
+  <p>The first instinct is the noble one: <em>open up the disease and understand its gears.</em> This is how an epidemiologist thinks, and it gives us the famous SIR model.</p>
+  <p>Split the whole city into three buckets. <b>S</b>usceptible — people who could still catch it. <b>I</b>nfected — people who have it right now. <b>R</b>ecovered — people who had it and are now immune. Over time, people only flow one way: a susceptible person meets an infected person and becomes infected; an infected person recovers. S → I → R.</p>
+  <p>Now write that flow down as the rate each bucket changes. Two numbers run the whole show: <span class="eq">β</span> (beta), how easily the disease jumps across a contact, and <span class="eq">γ</span> (gamma), how quickly people recover.</p>
+  <div class="eqblock">dS/dt = <b>−β</b>·S·I<br>dI/dt = <b>+β</b>·S·I − γ·I<br>dR/dt = <b>+</b>γ·I</div>
+  <p>Read them in plain English. The susceptible bucket only ever drains (people leave it when they get sick). The infected bucket gains the newly sick and loses the newly recovered — so it swells, peaks, and drains. The recovered bucket only ever fills. Trace that out and you get the three curves everyone saw on the news in 2020: susceptible slides down, infected rises into a wave and crashes, recovered climbs and flattens into a plateau.</p>
+  <figure class="reveal">
+    <svg viewBox="0 0 440 210" class="anim" role="img" aria-label="S I R curves over time">
+      <line x1="40" y1="180" x2="420" y2="180" class="thin"/><line x1="40" y1="16" x2="40" y2="180" class="thin"/>
+      <path class="ink draw" d="M44 40 C140 44 230 150 414 168"/>
+      <path class="acc draw d2" d="M44 176 C150 172 175 36 220 36 C275 36 300 150 414 172"/>
+      <path class="ink draw d3" d="M44 178 C170 176 250 70 414 44"/>
+      <text x="60" y="36" class="alab">susceptible</text><text x="195" y="30" class="alab" fill="#C0392B">infected</text><text x="330" y="40" class="alab">recovered</text>
+    </svg>
+    <figcaption>The three curves draw themselves out of the equations.</figcaption>
+  </figure>
+  <figure class="reveal"><img class="fig" src="figures/l2/l2-02-sir-equations.png" alt="The SIR model equations"><div class="fig-missing">figure generating…</div></figure>
+  <figure class="reveal"><img class="fig" src="figures/l2/l2-03-sir-curves.png" alt="Susceptible, infected, recovered curves"><div class="fig-missing">figure generating…</div></figure>
+  <p>Here is the payoff. Take the real New York numbers and tune <span class="eq">β</span> and <span class="eq">γ</span> until the model's curves sit on top of the data. Now you don't just have a prediction — you have <em>meaning</em>. You can compute the most important number of the whole pandemic:</p>
+  <div class="eqblock">R₀ = <b>β / γ</b>  ← the reproduction number</div>
+  <p>R₀ is how many people one sick person infects on average. Above 1, the fire grows. Below 1, it burns out. Every symbol in this model stands for something you can point at in the real world. That is the gift of the first way: it is <em>interpretable</em>. You end up understanding the disease.</p>
+  <figure class="reveal"><img class="fig" src="figures/l2/l2-04-sir-parameters.png" alt="Beta, gamma, and the reproduction number R0"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 3 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Three · the second way</div>
+  <h2>Refuse to understand it</h2>
+  <p>Now the rebellious idea — the one this whole series is built around. What if we throw all the biology away? No susceptible, no infected, no recovered, no β, no γ. We say only this: the number of infected is <em>some function of time.</em></p>
+  <div class="eqblock">infected = f( t )   ← but what on earth is f?</div>
+  <p>And here we hit an uncomfortable truth: functions can be unimaginably complicated. A straight line is the simplest — degree 1. Bend it once and you get a parabola — degree 2. Each step up the ladder buys another bend, another wiggle, another bit of freedom to chase the data up and down. We call that freedom <em>expressivity</em>.</p>
+  <figure class="reveal"><img class="fig" src="figures/l2/l2-05-function-ladder.png" alt="Degree 1 line, degree 2 parabola, degree 3 cubic, degree 4 quartic"><div class="fig-missing">figure generating…</div></figure>
+  <p>The true infection curve is not a tidy parabola. It is some monster — a function wrapped inside a function wrapped inside a function, <span class="eq">f(g(h(…(t))))</span> — far beyond anything you would ever write down by hand. We cannot name it. We cannot derive it. But maybe we don't have to. Maybe we just need a shape <em>flexible enough to become it</em> — and a way to bend that shape until it lands on the data.</p>
+  <figure class="reveal"><img class="fig" src="figures/l2/l2-06-unknown-function.png" alt="Some huge unknown nested function of time"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 4 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Four · the flexible shape</div>
+  <h2>A machine made of knobs</h2>
+  <p>Enter the neural network — the most flexible shape we know how to build. Feed time in at one end; read infected off the other. Inside, it is nothing but additions and multiplications, all of them controlled by thousands of numbers called <em>weights</em>.</p>
+  <p>Picture every weight as a little knob on a giant mixing board. Turn the knobs one way and the network traces a flat line. Turn them another way and it traces a wild, bending curve. The network can <em>become</em> almost any shape — you just have to find the right setting of the knobs.</p>
+  <figure class="reveal"><img class="fig" src="figures/l2/l2-07-nn-knobs.png" alt="A neural network whose weights are tunable knobs"><div class="fig-missing">figure generating…</div></figure>
+  <p>At the start, the knobs are set at random. So the network's first guess is nonsense — a lazy straight line drawn through data that clearly curves. The whole problem has now quietly changed shape. We are no longer asking "what is the function?" We are asking something far more mechanical: <em>how do we turn the knobs until the curve lands on the dots?</em></p>
+  <figure class="reveal">
+    <svg viewBox="0 0 440 210" class="anim" role="img" aria-label="A curve bending from a flat line to fit the data">
+      <circle cx="70" cy="150" r="4" class="inkf"/><circle cx="130" cy="120" r="4" class="inkf"/><circle cx="190" cy="80" r="4" class="inkf"/><circle cx="250" cy="60" r="4" class="inkf"/><circle cx="310" cy="78" r="4" class="inkf"/><circle cx="370" cy="120" r="4" class="inkf"/>
+      <path class="acc" fill="none"><animate attributeName="d" dur="4.5s" repeatCount="indefinite" values="M60 150 L380 150; M60 150 L380 150; M60 150 Q220 -10 380 150; M60 150 Q220 -10 380 150" keyTimes="0;0.2;0.8;1"/></path>
+      <g class="knob" transform="translate(400 30)"><circle r="13" class="grayf"/><line x1="0" y1="0" x2="0" y2="-10" class="acc" stroke-width="3"/></g>
+    </svg>
+    <figcaption>Turn the knobs, and the straight-line guess bends until it fits.</figcaption>
+  </figure>
+</section>
+
+<!-- 5 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Five · the engine</div>
+  <h2>Finding the right knobs: gradient descent</h2>
+  <p>First we need a score for "how wrong are we." Add up the gap between the network's curve and every real dot — that total is the <em>loss</em>. Big loss, bad fit. Zero loss, perfect fit. The goal is simply to make the loss small.</p>
+  <p>Now picture the loss as a landscape. Every possible setting of all the knobs is one spot on the ground, and the height of the ground there is how wrong that setting makes us. Somewhere out in that landscape is a deep valley — the best knobs. We want to get there. The trouble is we can't see the map. We are standing in fog.</p>
+  <p>But we <em>can</em> feel the slope under our feet — which way is downhill. So we do the only sensible thing: take a small step downhill, feel the slope again, step again. The direction of steepest downhill is called the <em>gradient</em>; walking against it, over and over, is <em>gradient descent</em>.</p>
+  <figure class="reveal">
+    <svg viewBox="0 0 440 210" class="anim" role="img" aria-label="A ball rolling down a loss curve to the minimum">
+      <path class="ink" d="M30 40 Q200 250 410 40"/>
+      <text x="40" y="36" class="alab">random start</text><text x="175" y="200" class="alab" fill="#C0392B">minimum loss</text>
+      <circle r="9" class="accf gd-ball"/>
+    </svg>
+    <figcaption>Start anywhere, keep stepping downhill, arrive at the bottom.</figcaption>
+  </figure>
+  <p>For a single knob, the move is tiny and exact. Look at how much the loss changes when you nudge this one knob — that slope is a <em>derivative</em>, written <span class="eq">∂L/∂w</span> — and step the knob a little in the downhill direction:</p>
+  <div class="eqblock">w  ←  w  <b>−</b>  η · ∂L/∂w</div>
+  <p>That η (eta) is just the step size. The miracle that makes this practical is <em>backpropagation</em>: a single sweep backward through the network that computes <span class="eq">∂L/∂w</span> for <em>every</em> knob at once, even when there are billions of them. Compute the slopes, nudge every knob a hair downhill, repeat thousands of times — and the random scribble slowly, stubbornly settles onto the data. That is the entire engine.</p>
+  <figure class="reveal"><img class="fig" src="figures/l2/l2-08-gradient-descent.png" alt="Gradient descent: a ball rolling to the minimum of a loss curve"><div class="fig-missing">figure generating…</div></figure>
+  <figure class="reveal"><img class="fig" src="figures/l2/l2-09-update-rule.png" alt="The parameter update rule and backpropagation"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 6 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Six · the move</div>
+  <h2>What just happened: the handoff</h2>
+  <p>Step all the way back and look at what we did. We never used a single fact about viruses. We said: <em>"I don't know the rule, so I'll build a huge flexible function and let an automatic procedure turn its knobs until it fits."</em> And then we walked away and let gradient descent do the work.</p>
+  <div class="thesis">
+    <div class="t">the whole lecture, in one line</div>
+    <p>If you don't know how to get from input to output, don't try to write the rule. Drop a large function full of tunable knobs in the middle — and <em>hand the search off to gradient descent.</em></p>
+  </div>
+  <p>This is not clever. It is not understanding. It is a <em>handoff</em>. And here is the punchline humans keep rediscovering, a little sheepishly, every decade: it works — almost embarrassingly well. The bigger and more flexible the function, the more easily it wraps itself around whatever pattern is hiding in the data. Everything that follows in this lecture is this exact same move, over and over, just wearing different costumes.</p>
+  <figure class="reveal"><img class="fig" src="figures/l2/l2-10-handoff-schematic.png" alt="The handoff: input, a large tunable function, output"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 7 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Seven · the move, in vision</div>
+  <h2>Cats and dogs</h2>
+  <p>Switch the costume. The input is now an image — really just a grid of pixel numbers. The output is one word: <em>cat</em> or <em>dog</em>. And once again, the obvious first move is to try to <em>build</em> the rule by hand.</p>
+  <p>Before about 2012, that is exactly what a computer-vision scientist did. They sat down and wrote little detectors, one at a time — a function that looks for whiskers, a function that looks for floppy ears, a function that looks for a wet black nose — ran them across the image, and tallied up the votes. Something like:</p>
+  <div class="code"><span class="c"># the hand-written way, before CNNs</span>
+score = 0
+if detect_whiskers(image):    score += 1   <span class="c"># cats &amp; dogs both...</span>
+if detect_floppy_ears(image): score -= 2   <span class="c"># leans dog</span>
+if detect_wet_nose(image):    score -= 1   <span class="c"># leans dog</span>
+if detect_slit_pupils(image): score += 2   <span class="c"># leans cat</span>
+return "dog" if score &lt; 0 else "cat"</div>
+  <p>It is clever, and it is wonderfully interpretable — you can read exactly why it decided "dog." It is also brittle and exhausting. One new breed, one odd camera angle, one cat with strangely floppy ears, and your lovingly hand-tuned rules fall apart. Every improvement is another late night writing another detector by hand.</p>
+  <figure class="reveal"><img class="fig" src="figures/l2/l2-11-vision-rules.png" alt="The old way: computer-vision rules written by hand"><div class="fig-missing">figure generating…</div></figure>
+  <p>Then comes the handoff, and it is the same move as the virus. Stop writing detectors. Drop a big function — a <em>convolutional neural network</em> — between the pixels and the answer, and turn its knobs with gradient descent until it gets cats and dogs right. Nobody ever tells it about whiskers. But show it enough cats and dogs, and layer by layer it <em>invents its own detectors</em> — first edges, then textures, then ears and eyes and snouts — and you can actually see them light up inside the network as feature maps.</p>
+  <p>Don't know the rule from pixels to label → drop in a large function → hand it to the gradient. Exactly what we did for the disease.</p>
+  <figure class="reveal"><img class="fig" src="figures/l2/l2-12-vision-cnn.png" alt="The CNN handoff, with learned feature maps"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 8 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Eight · the move, in language</div>
+  <h2>Attention: the rule nobody could write</h2>
+  <p>Now the costume that runs the modern world. Inside every large language model there is a step where each word looks around at the other words and decides which ones matter to it — a step called <em>attention</em>. In the sentence "the animal didn't cross the street because <em>it</em> was tired," the word "it" needs to look back and realize it means "animal." But by what <em>rule</em> should it know to do that?</p>
+  <p>Let's start where the model starts: with the words already turned into vectors. Every word is an <em>embedding</em> — a long list of numbers. The most obvious rule for "how much should word A attend to word B" is the simplest thing you can do with two vectors: take their <em>dot product</em>. The dot product is large when two vectors point the same way, small when they don't — a natural little similarity score.</p>
+  <div class="eqblock">score(A, B) = embedding<sub>A</sub> <b>·</b> embedding<sub>B</sub></div>
+  <p>We <em>could</em> build attention out of that and call it a day. But it's rigid: the raw embeddings were never shaped for this particular job, and a fixed dot product can't learn to ask the right question.</p>
+  <figure class="reveal"><img class="fig" src="figures/l2/l2-13-attention-dotproduct.png" alt="The simple rule: a dot product between embeddings"><div class="fig-missing">figure generating…</div></figure>
+  <p>So we do the handoff. We slip three <em>trainable matrices</em> — <span class="eq">W<sub>Q</sub></span>, <span class="eq">W<sub>K</sub></span>, <span class="eq">W<sub>V</sub></span> — between the embeddings and the dot product, and let them reshape each embedding into three new roles: a <em>query</em> (what am I looking for?), a <em>key</em> (what do I offer?), and a <em>value</em> (what do I pass on?).</p>
+  <div class="eqblock">Q = X·<b>W<sub>Q</sub></b>   K = X·<b>W<sub>K</sub></b>   V = X·<b>W<sub>V</sub></b><br><br>scores = ( Q · Kᵀ ) / √d<sub>k</sub><br>weights = softmax( scores )<br>output = weights · V</div>
+  <p>Read it slowly. First the matrices turn each word's embedding into a query, a key, and a value. Then the attention score between two words is just a dot product again — but now between the <em>learned</em> query and key, not the raw embeddings. Scale it (the <span class="eq">√d<sub>k</sub></span> keeps the numbers sane), softmax it into weights that add to one, and mix the values by those weights. That mix is the output.</p>
+  <p>Notice what we never did: we never wrote the rule for which word attends to which. We wrote three <em>blank</em> matrices and handed them to gradient descent. The rule for "it → animal" was never authored by a human. It was found.</p>
+  <figure class="reveal"><img class="fig" src="figures/l2/l2-14-attention-qkv.png" alt="Attention with WQ, WK, WV, scores, softmax, and values"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 9 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Nine · the pattern</div>
+  <h2>One move, three worlds</h2>
+  <p>A virus, a photograph, a sentence. Three worlds with nothing in common — and the very same move in each. Don't know how to get from input to output? Put a big bundle of trainable numbers in the middle, define what "wrong" means, and let gradient descent find them. Once you see it, you cannot unsee it. It is, quite literally, most of modern AI.</p>
+</section>
+
+<!-- 10 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Ten · the road not taken</div>
+  <h2>But it wasn't always this way</h2>
+  <p>It is worth remembering that this isn't the only way a machine can learn — and that for a while, it wasn't even the main way. Rewind to 1958, to Frank Rosenblatt's <em>perceptron</em>. It learned too. But in a completely different spirit, one that's almost the opposite of the handoff.</p>
+  <p>Here, a human wrote the <em>learning rule itself</em>, by hand. Show the perceptron one example. If it gets the answer right, leave it alone. If it gets it wrong, nudge each weight by a fixed, hand-designed recipe:</p>
+  <div class="eqblock">w  ←  w  <b>+</b>  ( y − ŷ ) · x</div>
+  <p>In words: take the true answer minus the guess, multiply by the input, and add a touch of that to the weights. That's it — a rule a person reasoned out and wrote down. And it has a beautiful effect: every time the perceptron sees an example it got wrong, its decision line tilts a little toward fixing that mistake. Watch it run on two classes of points and the line literally rotates, step by step, until it cleanly separates them.</p>
+  <figure class="reveal">
+    <svg viewBox="0 0 300 210" class="anim" role="img" aria-label="A perceptron decision line rotating to separate two classes">
+      <circle cx="70" cy="60" r="6" class="grayf"/><circle cx="100" cy="95" r="6" class="grayf"/><circle cx="60" cy="120" r="6" class="grayf"/><circle cx="110" cy="150" r="6" class="grayf"/>
+      <rect x="195" y="55" width="11" height="11" class="grayf"/><rect x="225" y="92" width="11" height="11" class="grayf"/><rect x="200" y="125" width="11" height="11" class="grayf"/><rect x="235" y="150" width="11" height="11" class="grayf"/>
+      <line x1="150" y1="20" x2="150" y2="190" class="acc pline"/>
+    </svg>
+    <figcaption>The hand-written rule rotates the line until the two classes split.</figcaption>
+  </figure>
+  <figure class="reveal"><img class="fig" src="figures/l2/l2-15-perceptron.png" alt="The perceptron: a learning rule written by hand"><div class="fig-missing">figure generating…</div></figure>
+  <p>There is a real argument that <em>this</em> is the purer machine learning — a human understood the problem deeply enough to design the very update that fixes it. What we did in all the sections before this — handing a featureless pile of knobs to gradient descent and refusing to think about the rule at all — is what we now call <em>deep learning</em>. The perceptron writes the rule. Deep learning declines to, and hands the whole search away. Both learn. They just disagree about how much a human should have to understand first.</p>
+</section>
+
+<!-- 11 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Eleven · the frontier</div>
+  <h2>The same move, at the edge</h2>
+  <p>If this all sounds like history, it isn't. The handoff is being made right now, at the bleeding edge, by the most advanced labs in the world — and recognizing it turns frontier papers into something you can read calmly.</p>
+  <p>Take a very current problem. Long contexts make attention expensive: when a token has a hundred thousand previous tokens to look at, comparing it to all of them is wasteful. A token really only needs the <em>few</em> that matter. But which few? How do you choose?</p>
+  <p>You could try to hand-write a rule for "importance." Or — same move — you do what DeepSeek's <em>sparse attention</em> does: add a tiny extra set of trainable weights called an <em>indexer</em>. It turns each token into an index-query and each past token into an index-key, dots them to score every candidate, and keeps only the top handful. Nobody hand-codes which tokens to keep. We add blank trainable matrices and let gradient descent learn the selection.</p>
+  <div class="eqblock">index score = ( x · <b>W<sub>Q</sub><sup>idx</sup></b> ) · ( x<sub>past</sub> · <b>W<sub>K</sub><sup>idx</sup></b> )ᵀ   →   keep the top-k</div>
+  <figure class="reveal"><img class="fig" src="figures/l2/l2-16-deepseek-sparse.png" alt="DeepSeek sparse attention: a trainable indexer selects tokens"><div class="fig-missing">figure generating…</div></figure>
+  <p>This is the thread that ties the whole lecture into a single knot. If you ever find yourself at a research frontier and you don't know how to get from input to output — a new architecture, a selection problem, a routing decision — reach for the same move. <em>Blank trainable matrices, plus the gradient.</em> It is almost always worth trying first.</p>
+</section>
+
+<!-- 12 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Twelve · the verdict</div>
+  <h2>Does the handoff actually work?</h2>
+  <p>You'd be right to be suspicious. It sounds almost too lazy to be true. Refuse to understand the problem, bolt on a giant pile of adjustable numbers, define "wrong," and let a slope-following procedure tune them in the fog? Surely that can't be how anything that looks like real intelligence emerges.</p>
+  <p>And yet. You are very likely reading this because of tools like Claude Code — which open real codebases, find real bugs, and write working software that ships. Pull that apart and what is inside? A large language model. Inside that, attention. Inside attention, <span class="eq">W<sub>Q</sub></span>, <span class="eq">W<sub>K</sub></span>, <span class="eq">W<sub>V</sub></span>. And underneath all of it, gradient descent turning knobs against a loss. It is handoffs all the way down.</p>
+  <figure class="reveal"><img class="fig" src="figures/l2/l2-17-does-it-work.png" alt="Claude Code rests on an LLM, on attention, on gradient descent"><div class="fig-missing">figure generating…</div></figure>
+  <p>So — does it work? We don't have to argue about it anymore. We don't even have to run an experiment. We are living inside the answer, every day. The strangest part of this whole story is that the lazy move won.</p>
+  <div class="takeaway">
+    <div class="t">the move to keep</div>
+    <p>When you can't write the rule from input to output — don't. Put a large function of trainable weight matrices in the middle, decide what "wrong" means, and hand the search to the gradient. Then check whether it worked. Lately, it almost always has.</p>
+  </div>
+</section>
+
+<hr class="rule" style="margin-top:2rem">
+<footer class="wrap reveal">
+  <div class="next">Next time — Predict the Part, Learn the Whole.</div>
+  <div class="sig">The Great Mental Models of Artificial Intelligence</div>
+</footer>
+
+<script>
+  var bar=document.getElementById('bar');
+  function onScroll(){var h=document.documentElement;bar.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';}
+  document.addEventListener('scroll',onScroll,{passive:true});onScroll();
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:0.08,rootMargin:'0px 0px -5% 0px'});
+  document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});
+  document.querySelectorAll('img.fig').forEach(function(img){img.addEventListener('error',function(){img.style.display='none';var p=img.nextElementSibling;if(p)p.style.display='block';});});
+</script>
+</body>
+</html>
