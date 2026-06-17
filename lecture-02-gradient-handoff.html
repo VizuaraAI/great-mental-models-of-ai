@@ -161,14 +161,40 @@
   <p>Picture every weight as a little knob on a giant mixing board. Turn the knobs one way and the network traces a flat line. Turn them another way and it traces a wild, bending curve. The network can <em>become</em> almost any shape — you just have to find the right setting of the knobs.</p>
   <figure class="reveal"><img class="fig" src="figures/l2/l2-07-nn-knobs.png" alt="A neural network whose weights are tunable knobs"><div class="fig-missing">figure generating…</div></figure>
   <p>At the start, the knobs are set at random. So the network's first guess is nonsense — a lazy straight line drawn through data that clearly curves. The whole problem has now quietly changed shape. We are no longer asking "what is the function?" We are asking something far more mechanical: <em>how do we turn the knobs until the curve lands on the dots?</em></p>
-  <figure class="reveal">
-    <svg viewBox="0 0 440 210" class="anim" role="img" aria-label="A curve bending from a flat line to fit the data">
-      <circle cx="70" cy="150" r="4" class="inkf"/><circle cx="130" cy="120" r="4" class="inkf"/><circle cx="190" cy="80" r="4" class="inkf"/><circle cx="250" cy="60" r="4" class="inkf"/><circle cx="310" cy="78" r="4" class="inkf"/><circle cx="370" cy="120" r="4" class="inkf"/>
-      <path class="acc" fill="none"><animate attributeName="d" dur="4.5s" repeatCount="indefinite" values="M60 150 L380 150; M60 150 L380 150; M60 150 Q220 -10 380 150; M60 150 Q220 -10 380 150" keyTimes="0;0.2;0.8;1"/></path>
-      <g class="knob" transform="translate(400 30)"><circle r="13" class="grayf"/><line x1="0" y1="0" x2="0" y2="-10" class="acc" stroke-width="3"/></g>
+  <figure class="reveal" id="fitdemo">
+    <svg viewBox="0 0 440 215" class="anim" role="img" aria-label="Drag the knob to bend the curve onto the data">
+      <g id="fit-dots"></g>
+      <path id="fit-curve" fill="none" stroke="#C0392B" stroke-width="2.8" stroke-linecap="round"/>
     </svg>
-    <figcaption>Turn the knobs, and the straight-line guess bends until it fits.</figcaption>
+    <div style="display:flex;align-items:center;gap:12px;max-width:360px;margin:.2rem auto 0">
+      <span class="mk" style="font-size:12px;color:var(--faint)">random</span>
+      <input type="range" id="fit-knob" min="0" max="100" value="0" aria-label="fit knob" style="flex:1;accent-color:#C0392B;cursor:pointer">
+      <span class="mk" style="font-size:12px;color:var(--accent)">fitted</span>
+    </div>
+    <div style="text-align:center;font-family:ui-monospace,monospace;font-size:13px;color:var(--muted);margin-top:.55rem">loss: <b id="fit-loss" style="color:var(--accent)">—</b> &nbsp;<span id="fit-ok" class="mk" style="color:var(--accent)"></span></div>
+    <figcaption>Drag the knob ← → yourself, and watch the lazy straight line bend until it lands on the dots.</figcaption>
   </figure>
+  <script>
+  (function(){
+    var P0x=60,P0y=185,P2x=380,P2y=185,P1x=220,target=-55,flat=185;
+    var ts=[0.13,0.27,0.42,0.55,0.70,0.85];
+    function by(t,p1y){var u=1-t;return u*u*P0y+2*u*t*p1y+t*t*P2y;}
+    function bx(t){var u=1-t;return u*u*P0x+2*u*t*P1x+t*t*P2x;}
+    var g=document.getElementById('fit-dots'),dots=[];
+    ts.forEach(function(t){var x=bx(t),y=by(t,target);
+      var c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+      c.setAttribute('cx',x.toFixed(1));c.setAttribute('cy',y.toFixed(1));c.setAttribute('r','4.6');c.setAttribute('fill','#1A1A1A');
+      g.appendChild(c);dots.push({t:t,y:y});});
+    var curve=document.getElementById('fit-curve'),knob=document.getElementById('fit-knob'),
+        lossEl=document.getElementById('fit-loss'),okEl=document.getElementById('fit-ok');
+    function update(){var s=knob.value/100,p1y=flat+(target-flat)*s;
+      curve.setAttribute('d','M'+P0x+' '+P0y+' Q'+P1x+' '+p1y.toFixed(1)+' '+P2x+' '+P2y);
+      var loss=0;dots.forEach(function(d){loss+=Math.abs(by(d.t,p1y)-d.y);});
+      lossEl.textContent=Math.round(loss);
+      okEl.textContent=loss<4?'✓ it fits!':'';}
+    knob.addEventListener('input',update);update();
+  })();
+  </script>
 </section>
 
 <!-- 5 -->
