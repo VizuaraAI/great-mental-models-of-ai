@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Byproduct Theorem · The Great Mental Models of AI · Lecture Three</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Permanent+Marker&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFFFFF; --ink:#1A1A1A; --muted:#565656; --faint:#9B9B9B;
+    --accent:#C0392B; --accent-soft:#F4E2DE; --line:#ECECEC; --gray:#D9D9D6; --maxw:720px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:Inter,system-ui,sans-serif; font-size:18px; line-height:1.78; -webkit-font-smoothing:antialiased}
+  .mk{font-family:'Permanent Marker',cursive; font-weight:400}
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 28px}
+  .bar{position:fixed; top:0; left:0; height:3px; width:0; background:var(--accent); z-index:50}
+  .rule{height:1px; background:var(--line); border:0; margin:0}
+  a{color:var(--accent)}
+
+  header{min-height:90vh; display:flex; flex-direction:column; justify-content:center; padding:7vh 0 5vh}
+  .kicker{font-family:'Permanent Marker',cursive; font-size:14px; letter-spacing:.04em; color:var(--accent)}
+  h1{font-family:'Permanent Marker',cursive; font-weight:400; font-size:clamp(44px,8vw,76px); line-height:1.06; margin:.7rem 0 0}
+  h1 .red{color:var(--accent)}
+  .sub{font-size:20px; color:var(--muted); margin-top:1.6rem; max-width:42ch}
+  .scrollcue{font-family:'Permanent Marker',cursive; margin-top:3rem; font-size:15px; color:var(--faint)}
+
+  section{padding:2.6rem 0}
+  .sec-kicker{font-family:'Permanent Marker',cursive; font-size:15px; color:var(--faint)}
+  h2{font-family:'Permanent Marker',cursive; font-weight:400; font-size:clamp(28px,4.8vw,40px); line-height:1.1; margin:.2rem 0 1.1rem}
+  p{margin:0 0 1.15rem}
+  .lead{font-size:20px}
+  .drop::first-letter{font-family:'Permanent Marker',cursive; float:left; font-size:3.3em; line-height:.82; padding:.06em .14em 0 0; color:var(--accent)}
+  .eq{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.92em; background:#F6F4F1; border:1px solid var(--line); border-radius:6px; padding:.08em .4em; white-space:nowrap}
+  .eqblock{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:15px; background:#F6F4F1; border:1px solid var(--line); border-radius:10px; padding:.9rem 1rem; margin:1.2rem 0; overflow-x:auto; line-height:1.9; text-align:center}
+  .eqblock b{color:var(--accent); font-weight:600}
+  .ways{margin:1.4rem 0}
+  .way{display:flex; gap:14px; align-items:flex-start; margin:.8rem 0}
+  .way .n{font-family:'Permanent Marker',cursive; color:var(--accent); font-size:22px; line-height:1; min-width:26px}
+  .way .b{margin:0}
+
+  figure{margin:2rem 0 .4rem}
+  figure img{display:block; width:100%; max-width:600px; margin:0 auto; height:auto}
+  figcaption{font-size:13px; color:var(--faint); text-align:center; margin-top:.5rem; max-width:46ch; margin-left:auto; margin-right:auto}
+  .fig-missing{display:none; max-width:600px; margin:0 auto; border:2px dashed var(--line); border-radius:10px; padding:3rem 1rem; text-align:center; color:var(--faint); font-family:'Permanent Marker',cursive}
+
+  .thesis{border:2px solid var(--accent); border-radius:16px; padding:1.4rem 1.6rem; margin:2rem 0; background:#fff}
+  .thesis .t{font-family:'Permanent Marker',cursive; color:var(--accent); font-size:18px; margin-bottom:.5rem}
+  .thesis p{margin:0; font-size:19px}
+  .takeaway{background:var(--accent-soft); border-radius:16px; padding:1.4rem 1.6rem; margin:2rem 0}
+  .takeaway .t{font-family:'Permanent Marker',cursive; font-size:16px; color:var(--accent); margin-bottom:.4rem}
+  .takeaway p{margin:0}
+
+  .anim{width:100%; max-width:460px; height:auto; display:block; margin:1.8rem auto .2rem}
+  .acc{fill:none; stroke:var(--accent); stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round}
+  .ink{fill:none; stroke:var(--ink); stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round}
+  .thin{fill:none; stroke:var(--faint); stroke-width:1}
+  .accf{fill:var(--accent)} .grayf{fill:var(--gray); stroke:#bdb6a8; stroke-width:1} .inkf{fill:var(--ink)}
+  .alab{font-family:'Permanent Marker',cursive; font-size:12px; fill:var(--muted)}
+  .draw{stroke-dasharray:600; stroke-dashoffset:600}
+  .reveal.in .draw{animation:draw 1.8s ease forwards}
+  .reveal.in .draw.d2{animation-delay:.4s}.reveal.in .draw.d3{animation-delay:.8s}.reveal.in .draw.d4{animation-delay:1.2s}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  .wv-dot{transition:transform 1.5s cubic-bezier(.4,0,.2,1)}
+  .knobrow{display:flex; align-items:center; gap:12px; max-width:380px; margin:.2rem auto 0}
+  .knobrow input{flex:1; accent-color:#C0392B; cursor:pointer}
+  .readout{text-align:center; font-family:ui-monospace,monospace; font-size:13px; color:var(--muted); margin-top:.55rem}
+  .readout b{color:var(--accent)}
+
+  .reveal{opacity:0; transform:translateY(16px); transition:opacity .8s ease, transform .8s ease}
+  .reveal.in{opacity:1; transform:none}
+  @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}.wv-dot{transition:none}}
+  footer{padding:5rem 0 7rem; text-align:center}
+  footer .next{font-family:'Permanent Marker',cursive; font-size:22px; color:var(--accent)}
+  footer .sig{margin-top:1.1rem; font-family:'Permanent Marker',cursive; font-size:14px; color:var(--faint)}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+
+<header class="wrap">
+  <div class="kicker reveal">The Great Mental Models of Artificial Intelligence · Lecture Three</div>
+  <h1 class="reveal">The Byproduct <span class="red">Theorem</span></h1>
+  <div class="sub reveal">A smart loss function can lead to surprisingly intelligent byproducts. Don't build the skill — build the hunger, and watch the skill fall out.</div>
+  <div class="scrollcue reveal">Scroll slowly ↓</div>
+</header>
+<hr class="rule">
+
+<!-- 1 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">One · the parable</div>
+  <h2>A man by the river</h2>
+  <p class="lead drop">There is a man who lives by a river, and he is hungry. He has never learned to fish. Three people come along, and each offers to help — and each, without quite knowing it, believes something different about what "helping" even means.</p>
+  <div class="ways">
+    <div class="way"><span class="n">1</span><p class="b"><b>The first gives him a fish.</b> He eats tonight. And tomorrow he is exactly where he started — hungry, helpless, waiting for the next gift.</p></div>
+    <div class="way"><span class="n">2</span><p class="b"><b>The second teaches him to fish.</b> Better — now he eats every day. But he has learned one trick. Move him to a desert, or a forest with no river, and he starves beside the food, because all he knows is fish.</p></div>
+    <div class="way"><span class="n">3</span><p class="b"><b>The third teaches him nothing at all.</b> They simply make sure that the man's own hunger is the only teacher he needs — and then they step back. And the hungry man, left to it, invents fishing. Then traps for birds. Then he plants the seeds he finds. Then he trades his surplus with a neighbour. Skills nobody taught him, and a few nobody imagined, all falling out of one relentless thing: the need.</p></div>
+  </div>
+  <figure class="reveal"><img class="fig" src="figures/l3/l3-02-give-a-fish.png" alt="Give him a fish — he eats today, helpless tomorrow"><div class="fig-missing">figure generating…</div></figure>
+  <figure class="reveal"><img class="fig" src="figures/l3/l3-03-teach-to-fish.png" alt="Teach him to fish — he eats every day, but only fish"><div class="fig-missing">figure generating…</div></figure>
+  <figure class="reveal"><img class="fig" src="figures/l3/l3-04-teach-hunger.png" alt="Teach him hunger — and the skills fall out as byproducts"><div class="fig-missing">figure generating…</div></figure>
+  <p>That third way is the whole lecture. The hunger is a <em>loss function</em> — a single, humble thing to minimize. The fishing, the traps, the farming, the trade — those are <em>byproducts</em>. And the astonishing claim of modern AI is that if you choose the hunger well enough, the byproducts start to look a lot like intelligence.</p>
+  <figure class="reveal"><img class="fig" src="figures/l3/l3-01-fisherman-river.png" alt="A man by the river who cannot fish"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 2 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Two · the theorem</div>
+  <h2>You build the hunger, not the skill</h2>
+  <p>Here is the idea, stated plainly. You do not get intelligence by listing it out, rule by rule, skill by skill. You get it by choosing a <em>hunger</em> — a loss function — so well-aimed that being intelligent becomes simply the cheapest way to satisfy it.</p>
+  <div class="thesis">
+    <div class="t">the byproduct theorem</div>
+    <p>Design a clever enough loss, and capabilities you never specified — never even imagined — come along for free, as byproducts of minimizing it.</p>
+  </div>
+  <p>The loss is the lever. It is the one thing you actually choose. Everything else — the weights, the features, the skills — is found for you by gradient descent (that was last lecture). So the whole game becomes: <em>what is the right hunger?</em> The rest of this lecture is three times watching someone pick a humble little loss and get something extraordinary, for free.</p>
+  <figure class="reveal">
+    <svg viewBox="0 0 460 150" class="anim" role="img" aria-label="A loss producing intelligent byproducts">
+      <rect x="20" y="55" width="120" height="42" rx="8" class="grayf"/><text x="34" y="74" class="alab">a clever loss</text><text x="34" y="89" class="alab">(the hunger)</text>
+      <path class="acc draw" d="M148 76 L300 76" marker-end=""/>
+      <path class="acc draw d2" d="M300 76 L240 40"/><path class="acc draw d3" d="M300 76 L240 112"/><path class="acc draw d4" d="M300 76 L250 76"/>
+      <rect x="312" y="34" width="130" height="84" rx="8" class="grayf"/><text x="326" y="70" class="alab" fill="#C0392B">intelligent</text><text x="326" y="88" class="alab" fill="#C0392B">byproducts</text>
+    </svg>
+    <figcaption>You pick the loss on the left. The right side is found for you.</figcaption>
+  </figure>
+  <figure class="reveal"><img class="fig" src="figures/l3/l3-05-byproduct-theorem.png" alt="A clever loss produces intelligent byproducts"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 3 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Three · language</div>
+  <h2>Predict one word, get a whole language</h2>
+  <p>Take the three ways and point them at a language model. How do you teach a machine to use human language?</p>
+  <div class="ways">
+    <div class="way"><span class="n">1</span><p class="b"><b>Give it a fish.</b> Store every sentence and its reply in a giant table. It's a parrot — fine until you say something the table has never seen, and then it has nothing.</p></div>
+    <div class="way"><span class="n">2</span><p class="b"><b>Teach it to fish.</b> Hand-code the grammar: subject before verb, rules for tense, for plurals, for commas. It obeys — but it's a rulebook, not a mind, and it has no idea what any sentence <em>means</em>.</p></div>
+    <div class="way"><span class="n">3</span><p class="b"><b>Give it the hunger.</b> Tell it nothing about grammar or meaning. One objective only: given the words so far, predict the next one.</p></div>
+  </div>
+  <figure class="reveal"><img class="fig" src="figures/l3/l3-06-llm-three-ways.png" alt="Three ways to teach a language model"><div class="fig-missing">figure generating…</div></figure>
+  <p>"The cat sat on the ___." Guess the next word. That is the entire hunger — and to satisfy it across a trillion sentences, the model is quietly forced to learn two enormous things it was never taught.</p>
+  <figure class="reveal"><img class="fig" src="figures/l3/l3-07-next-token.png" alt="Predict the next token"><div class="fig-missing">figure generating…</div></figure>
+  <p>The first byproduct is <em>form</em>. To predict well, the model has to absorb the shape of the language — it learns subject-verb-object without ever hearing the words "subject" or "verb." We never wrote a grammar; the grammar fell out.</p>
+  <p>The second byproduct is deeper: <em>meaning</em>. Consider the sentence "blue electrons eat fish." The form is flawless — article, adjective, noun, verb, noun, all in order — and yet it is utter nonsense. A model that only learned form would happily say it. But a model hungry enough to predict real text learns that nobody ever writes that, because it doesn't <em>mean</em> anything — and so it won't say it either. Meaning, the thing we never defined, fell out of the same humble guess-the-next-word game.</p>
+  <figure class="reveal"><img class="fig" src="figures/l3/l3-08-form-meaning.png" alt="Form and meaning both fall out as byproducts"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 4 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Four · word vectors</div>
+  <h2>Where does "king" go?</h2>
+  <p>Here is a problem that sounds impossible. We want to turn every word into a vector — a point in space — so that a machine can do arithmetic on meaning. But who decides <em>where</em> each word goes? You cannot sit down and hand-place a few hundred thousand words by taste. "King" goes... where, exactly? And relative to what?</p>
+  <figure class="reveal"><img class="fig" src="figures/l3/l3-09-word2vec-problem.png" alt="Words into vectors — how can a vector capture meaning?"><div class="fig-missing">figure generating…</div></figure>
+  <p>So in 2013 a team at Google made the same move: don't place the words — design a hunger that places them for you. The proxy is beautiful and humble. A word should be good at predicting the company it keeps. Pull words that show up together in real sentences <em>closer</em>; push random, unrelated words <em>apart</em>. That's the whole loss.</p>
+  <figure class="reveal"><img class="fig" src="figures/l3/l3-10-word2vec-loss.png" alt="The proxy loss: predict your neighbours — pull neighbours close, push strangers apart"><div class="fig-missing">figure generating…</div></figure>
+  <p>Train on that one game over a mountain of text, and watch what falls out. Every word drifts to a spot that quietly encodes its meaning. Synonyms pile together. Kings and queens settle near royalty; cats and dogs near animals. And the geometry turns uncanny: the little step from "man" to "king" turns out to be the very same step as "woman" to "queen" — so <span class="eq">king − man + woman</span> lands almost exactly on <span class="eq">queen</span>. Nobody placed a single word. Meaning fell out, as pure geometry.</p>
+  <figure class="reveal">
+    <svg viewBox="0 0 460 220" class="anim" id="wv" role="img" aria-label="Word vectors drifting from scattered into meaningful clusters">
+      <g class="wv-dot" style="transform:translate(150px,40px)"><circle cx="95" cy="60" r="5" class="accf"/><text x="104" y="64" class="alab" fill="#C0392B">queen</text></g>
+      <g class="wv-dot" style="transform:translate(-120px,80px)"><circle cx="95" cy="90" r="5" class="inkf"/><text x="104" y="94" class="alab">king</text></g>
+      <g class="wv-dot" style="transform:translate(60px,-60px)"><circle cx="70" cy="120" r="5" class="inkf"/><text x="20" y="124" class="alab">man</text></g>
+      <g class="wv-dot" style="transform:translate(-90px,-30px)"><circle cx="120" cy="150" r="5" class="inkf"/><text x="128" y="154" class="alab">woman</text></g>
+      <g class="wv-dot" style="transform:translate(120px,70px)"><circle cx="320" cy="150" r="5" class="inkf"/><text x="328" y="154" class="alab">cat</text></g>
+      <g class="wv-dot" style="transform:translate(-60px,-90px)"><circle cx="360" cy="175" r="5" class="inkf"/><text x="368" y="179" class="alab">dog</text></g>
+      <line x1="70" y1="120" x2="95" y2="90" class="thin"/><line x1="120" y1="150" x2="95" y2="60" class="thin" stroke="#C0392B"/>
+    </svg>
+    <figcaption>Scroll in and the words drift from chaos into clusters that mean something.</figcaption>
+  </figure>
+  <figure class="reveal"><img class="fig" src="figures/l3/l3-11-word2vec-vectors.png" alt="Every word finds its place — king minus man plus woman equals queen"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 5 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Five · ridge regression</div>
+  <h2>Punish big weights, get wisdom</h2>
+  <p>The quietest example is also the purest, and it's decades old. The enemy is <em>overfitting</em>. A model can be so eager to please that it threads its curve through every single noisy data point — memorizing the wobble instead of the trend — and then falls apart the moment it sees something new.</p>
+  <figure class="reveal"><img class="fig" src="figures/l3/l3-12-overfitting.png" alt="Overfitting — memorising the noise, not the signal"><div class="fig-missing">figure generating…</div></figure>
+  <p>What we actually want is for it to <em>generalize</em>. But here's the trap: "generalize" is not a quantity you can directly minimize. You cannot write <span class="eq">loss = how_badly_it_generalizes</span> — you don't have the future data to measure it. So you reach for a hunger that gets you there sideways.</p>
+  <p>The clue is this: overfit models always have <em>huge weights</em>. Those violent up-and-down wiggles can only be drawn with enormous coefficients. So add one term to the loss that simply makes big weights expensive:</p>
+  <figure class="reveal"><img class="fig" src="figures/l3/l3-13-weights-blowup.png" alt="Overfit models have huge weights"><div class="fig-missing">figure generating…</div></figure>
+  <div class="eqblock">loss = error <b>+ λ · ‖w‖²</b></div>
+  <figure class="reveal"><img class="fig" src="figures/l3/l3-14-ridge-loss.png" alt="loss equals error plus lambda times norm of weights squared"><div class="fig-missing">figure generating…</div></figure>
+  <p>Now the model is hungry for two things at once: fit the data, <em>and</em> keep its weights small. That second hunger quietly forbids the wild wiggles — and a smooth, sensible curve is all that's left. The dial <span class="eq">λ</span> sets how hard you push. Try it yourself: drag <span class="eq">λ</span> up and watch the frantic overfit curve calm into something that will actually generalize.</p>
+  <figure class="reveal" id="ridgedemo">
+    <svg viewBox="0 0 460 230" class="anim" role="img" aria-label="Drag lambda to smooth an overfit curve">
+      <line x1="30" y1="200" x2="440" y2="200" class="thin"/><line x1="30" y1="20" x2="30" y2="200" class="thin"/>
+      <g id="ridge-dots"></g>
+      <path id="ridge-curve" fill="none" stroke="#C0392B" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="knobrow"><span class="mk" style="font-size:12px;color:var(--faint)">λ = 0</span><input type="range" id="ridge-knob" min="0" max="100" value="0" aria-label="lambda"><span class="mk" style="font-size:12px;color:var(--accent)">λ big</span></div>
+    <div class="readout">weight size: <b id="ridge-w">—</b> &nbsp; <span id="ridge-msg" class="mk" style="color:var(--accent)"></span></div>
+    <figcaption>λ = 0 threads every noisy dot (overfit). Push λ up and the weights — and the wiggles — shrink.</figcaption>
+  </figure>
+  <p>Notice we never told it to generalize. We only made big, wobbly weights costly — and good judgement fell out as the byproduct.</p>
+  <figure class="reveal"><img class="fig" src="figures/l3/l3-15-ridge-result.png" alt="Generalisation as a byproduct of small weights"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 6 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Six · the frontier</div>
+  <h2>Reward the answer, and reasoning appears</h2>
+  <p>If this all sounds like old wisdom, the most jaw-dropping example landed only last year. We want models that <em>reason</em> — that think in steps, slow down on hard problems, and catch their own mistakes. The obvious way is to teach it to fish: gather millions of human worked-solutions and have the model imitate them, step by careful step.</p>
+  <p>DeepSeek tried the third way instead. They built a hunger and almost nothing else: a reinforcement-learning reward that asked one blunt question — <em>is the final answer correct?</em> — and said absolutely nothing about <em>how</em> to think. No example reasoning. No "show your work." Just: get it right.</p>
+  <figure class="reveal"><img class="fig" src="figures/l3/l3-16-frontier-r1.png" alt="Reward only correctness — reasoning emerges as a byproduct (DeepSeek R1)"><div class="fig-missing">figure generating…</div></figure>
+  <p>And the byproduct stunned everyone who saw it. Chasing nothing but that reward, the model began — on its own — to write longer and longer chains of reasoning. It started to double back and check itself. It developed a now-famous "aha moment," learning to stop mid-thought and reconsider. None of it was demonstrated. All of it emerged, as a byproduct of "get the answer right." Reasoning, it turns out, is the cheapest way to keep being correct — so the hunger for correctness grew a thinker.</p>
+</section>
+
+<!-- 7 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Seven · your turn</div>
+  <h2>You could have discovered this</h2>
+  <p>So here is the move to carry out of the room with you. The next time you are stuck on something hard — in research, in a product, at a whiteboard at midnight — resist the urge to build the capability directly, brick by brick. Flip the question on its head.</p>
+  <p>Don't ask "how do I build this skill?" Ask: <em>what is the hunger?</em> What humble little loss function would make the thing I want the cheapest possible way to win? Find that loss, hand it to gradient descent, and step back. More often than you would ever believe, the capability you were trying so hard to engineer is sitting right there — waiting, as a byproduct of the right hunger.</p>
+  <figure class="reveal"><img class="fig" src="figures/l3/l3-17-apply-it.png" alt="Design the loss, not the skill — the capability is the byproduct"><div class="fig-missing">figure generating…</div></figure>
+  <div class="takeaway">
+    <div class="t">the move to keep</div>
+    <p>Don't engineer the capability — engineer the hunger. Ask what loss function would make the thing you want the cheapest way to win, hand it to gradient descent, and let the capability fall out. Someone discovered DeepSeek-R1 this way. The next one is waiting for whoever picks the right loss.</p>
+  </div>
+</section>
+
+<hr class="rule" style="margin-top:2rem">
+<footer class="wrap reveal">
+  <div class="next">Next time — Everything Is a Vector.</div>
+  <div class="sig">The Great Mental Models of Artificial Intelligence</div>
+</footer>
+
+<script>
+  var bar=document.getElementById('bar');
+  function onScroll(){var h=document.documentElement;bar.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';}
+  document.addEventListener('scroll',onScroll,{passive:true});onScroll();
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:0.08,rootMargin:'0px 0px -5% 0px'});
+  document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});
+  document.querySelectorAll('img.fig').forEach(function(img){img.addEventListener('error',function(){img.style.display='none';var p=img.nextElementSibling;if(p)p.style.display='block';});});
+  // word-vector settle: when #wv scrolls in, snap the dots home
+  var wv=document.getElementById('wv');
+  if(wv){var wo=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.querySelectorAll('.wv-dot').forEach(function(d){d.style.transform='translate(0px,0px)';});wo.unobserve(e.target);}});},{threshold:0.3});wo.observe(wv);}
+  // ridge regression interactive lambda
+  (function(){
+    var xs=[40,92,144,196,248,300,352,404];
+    var smooth=[170,158,147,137,128,120,113,107];
+    var noise=[-4,26,-20,18,-24,16,-12,8];
+    var dots=xs.map(function(x,i){return [x, smooth[i]+noise[i]];});
+    var g=document.getElementById('ridge-dots');
+    if(!g) return;
+    dots.forEach(function(p){var c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+      c.setAttribute('cx',p[0]);c.setAttribute('cy',p[1]);c.setAttribute('r','4.6');c.setAttribute('fill','#1A1A1A');g.appendChild(c);});
+    function cr(pts){var d='M '+pts[0][0]+' '+pts[0][1].toFixed(1);
+      for(var i=0;i<pts.length-1;i++){var p0=pts[i-1]||pts[i],p1=pts[i],p2=pts[i+1],p3=pts[i+2]||p2;
+        var c1x=p1[0]+(p2[0]-p0[0])/6,c1y=p1[1]+(p2[1]-p0[1])/6,c2x=p2[0]-(p3[0]-p1[0])/6,c2y=p2[1]-(p3[1]-p1[1])/6;
+        d+=' C '+c1x.toFixed(1)+' '+c1y.toFixed(1)+' '+c2x.toFixed(1)+' '+c2y.toFixed(1)+' '+p2[0]+' '+p2[1].toFixed(1);}
+      return d;}
+    var curve=document.getElementById('ridge-curve'),knob=document.getElementById('ridge-knob'),
+        wEl=document.getElementById('ridge-w'),msg=document.getElementById('ridge-msg');
+    var rough0=noise.reduce(function(a,n){return a+Math.abs(n);},0);
+    function upd(){var lam=knob.value/100;
+      var pts=xs.map(function(x,i){return [x, dots[i][1]*(1-lam)+smooth[i]*lam];});
+      curve.setAttribute('d',cr(pts));
+      var rough=Math.round(rough0*(1-lam));
+      wEl.textContent=rough;
+      msg.textContent = rough>80 ? '✗ overfitting' : (rough<25 ? '✓ smooth · generalises' : '');}
+    knob.addEventListener('input',upd);upd();
+  })();
+</script>
+</body>
+</html>
