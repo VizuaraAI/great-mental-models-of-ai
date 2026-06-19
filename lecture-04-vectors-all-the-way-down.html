@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vectors All the Way Down · The Great Mental Models of AI · Lecture Four</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Permanent+Marker&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFFFFF; --ink:#1A1A1A; --muted:#565656; --faint:#9B9B9B;
+    --accent:#C0392B; --accent-soft:#F4E2DE; --blue:#3B6EA5; --blue-soft:#EEF3F9; --line:#ECECEC; --gray:#D9D9D6; --maxw:720px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:Inter,system-ui,sans-serif; font-size:18px; line-height:1.78; -webkit-font-smoothing:antialiased}
+  .mk{font-family:'Permanent Marker',cursive; font-weight:400}
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 28px}
+  .bar{position:fixed; top:0; left:0; height:3px; width:0; background:var(--accent); z-index:50}
+  .rule{height:1px; background:var(--line); border:0; margin:0}
+  a{color:var(--accent)}
+
+  header{min-height:90vh; display:flex; flex-direction:column; justify-content:center; padding:7vh 0 5vh}
+  .kicker{font-family:'Permanent Marker',cursive; font-size:14px; letter-spacing:.04em; color:var(--accent)}
+  h1{font-family:'Permanent Marker',cursive; font-weight:400; font-size:clamp(42px,7.6vw,74px); line-height:1.06; margin:.7rem 0 0}
+  h1 .red{color:var(--accent)}
+  .sub{font-size:20px; color:var(--muted); margin-top:1.6rem; max-width:42ch}
+  .scrollcue{font-family:'Permanent Marker',cursive; margin-top:3rem; font-size:15px; color:var(--faint)}
+
+  section{padding:2.6rem 0}
+  .sec-kicker{font-family:'Permanent Marker',cursive; font-size:15px; color:var(--faint)}
+  h2{font-family:'Permanent Marker',cursive; font-weight:400; font-size:clamp(28px,4.8vw,40px); line-height:1.1; margin:.2rem 0 1.1rem}
+  h3{font-family:'Permanent Marker',cursive; font-weight:400; font-size:23px; margin:2rem 0 .5rem; color:var(--ink)}
+  h3 .b{color:var(--blue)}
+  p{margin:0 0 1.15rem}
+  .lead{font-size:20px}
+  .drop::first-letter{font-family:'Permanent Marker',cursive; float:left; font-size:3.3em; line-height:.82; padding:.06em .14em 0 0; color:var(--accent)}
+  .eq{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.92em; background:var(--blue-soft); border:1px solid #d9e3ef; border-radius:6px; padding:.08em .4em; white-space:nowrap; color:#28405c}
+
+  figure{margin:2rem 0 .4rem}
+  figure img{display:block; width:100%; max-width:620px; margin:0 auto; height:auto; border-radius:8px}
+  figcaption{font-size:13px; color:var(--faint); text-align:center; margin-top:.5rem; max-width:46ch; margin-left:auto; margin-right:auto}
+  .fig-missing{display:none; max-width:620px; margin:0 auto; border:2px dashed var(--line); border-radius:10px; padding:3rem 1rem; text-align:center; color:var(--faint); font-family:'Permanent Marker',cursive}
+
+  .takeaway{background:var(--accent-soft); border-radius:16px; padding:1.4rem 1.6rem; margin:2rem 0}
+  .takeaway .t{font-family:'Permanent Marker',cursive; font-size:16px; color:var(--accent); margin-bottom:.4rem}
+  .takeaway p{margin:0}
+
+  .anim{width:100%; max-width:440px; height:auto; display:block; margin:1.8rem auto .2rem}
+  .ink{fill:none; stroke:var(--ink); stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round}
+  .thin{fill:none; stroke:var(--faint); stroke-width:1}
+  .bluestroke{fill:none; stroke:var(--blue); stroke-width:2.4; stroke-linecap:round}
+  .alab{font-family:'Permanent Marker',cursive; font-size:12px; fill:var(--muted)}
+  .draw{stroke-dasharray:400; stroke-dashoffset:400}
+  .reveal.in .draw{animation:draw 1.6s ease forwards}
+  @keyframes draw{to{stroke-dashoffset:0}}
+
+  /* interactive token demo */
+  .tokwrap{margin:1.8rem auto; max-width:540px}
+  .tokhint{text-align:center; font-family:'Permanent Marker',cursive; font-size:14px; color:var(--faint); margin-bottom:.7rem}
+  .tokrow{display:flex; flex-wrap:wrap; gap:8px; justify-content:center}
+  .tokrow button{font:inherit; font-size:16px; padding:6px 13px; border:1.5px solid #c9d4e3; background:var(--blue-soft); color:#28405c; border-radius:8px; cursor:pointer; transition:transform .1s}
+  .tokrow button:active{transform:scale(.96)}
+  .tokout{text-align:center; margin-top:1.1rem; min-height:30px; font-family:ui-monospace,monospace; font-size:14.5px; color:var(--blue)}
+  .tokout b{color:var(--accent)}
+
+  .reveal{opacity:0; transform:translateY(16px); transition:opacity .8s ease, transform .8s ease}
+  .reveal.in{opacity:1; transform:none}
+  @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+  footer{padding:5rem 0 7rem; text-align:center}
+  footer .next{font-family:'Permanent Marker',cursive; font-size:22px; color:var(--accent)}
+  footer .sig{margin-top:1.1rem; font-family:'Permanent Marker',cursive; font-size:14px; color:var(--faint)}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+
+<header class="wrap">
+  <div class="kicker reveal">The Great Mental Models of Artificial Intelligence · Lecture Four</div>
+  <h1 class="reveal">Vectors All the Way <span class="red">Down</span></h1>
+  <div class="sub reveal">Every model gets the fame. But underneath text, images, audio, and video — underneath all of it — there is one quiet trick: turn the world into vectors.</div>
+  <div class="scrollcue reveal">Scroll slowly ↓</div>
+</header>
+<hr class="rule">
+
+<!-- 1 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">One · the foundation</div>
+  <h2>The lesson you didn't know you were learning</h2>
+  <p class="lead drop">Somewhere back in school, you met vectors and matrices. An arrow with a couple of numbers on it. A little grid of numbers wrapped in big brackets. You learned to add them, multiply them, maybe rotate a triangle with one — and then, reasonably enough, you filed them away as one more thing school made you do.</p>
+  <p>Nobody mentioned that you were staring at the load-bearing wall of the entire modern AI era. Every large language model, every image generator, every voice that talks back to you — peel away the branding and the buzzwords, and what is left, all the way down, is vectors and matrices. This lecture is about why that's true, and what shifts in how you see AI once you actually believe it.</p>
+  <figure class="reveal">
+    <svg viewBox="0 0 300 180" class="anim" role="img" aria-label="A vector drawn as an arrow on axes">
+      <line x1="40" y1="150" x2="260" y2="150" class="thin"/><line x1="40" y1="20" x2="40" y2="150" class="thin"/>
+      <line x1="40" y1="150" x2="220" y2="90" class="bluestroke draw" marker-end=""/>
+      <polygon points="220,90 206,90 214,102" fill="#3B6EA5"/>
+      <text x="232" y="86" class="alab" fill="#3B6EA5">[ 3, 1 ]</text>
+      <text x="120" y="172" class="alab">just a list of numbers</text>
+    </svg>
+    <figcaption>A vector: an arrow, a list of numbers. The whole field is built on this.</figcaption>
+  </figure>
+  <figure class="reveal"><img class="fig" src="figures/l4/l4-01-school-vectors.png" alt="You learned vectors and matrices in school"><div class="fig-missing">figure generating…</div></figure>
+  <figure class="reveal">
+    <svg viewBox="0 0 470 190" style="width:100%;max-width:480px;display:block;margin:1.8rem auto" role="img" aria-label="A vector feeding a neural network labelled AI">
+      <rect x="22" y="46" width="74" height="98" rx="10" fill="#EEF3F9" stroke="#3B6EA5" stroke-width="2"/>
+      <text x="59" y="72" text-anchor="middle" font-family="ui-monospace,monospace" font-size="15" fill="#3B6EA5">0.3</text>
+      <text x="59" y="94" text-anchor="middle" font-family="ui-monospace,monospace" font-size="15" fill="#3B6EA5">0.8</text>
+      <text x="59" y="116" text-anchor="middle" font-family="ui-monospace,monospace" font-size="15" fill="#3B6EA5">0.1</text>
+      <text x="59" y="138" text-anchor="middle" font-family="ui-monospace,monospace" font-size="15" fill="#3B6EA5">0.5</text>
+      <text x="59" y="170" text-anchor="middle" font-family="'Permanent Marker',cursive" font-size="13" fill="#565656">a vector</text>
+      <line x1="104" y1="95" x2="166" y2="95" stroke="#C0392B" stroke-width="3.5"/><polygon points="172,95 158,88 158,102" fill="#C0392B"/>
+      <g stroke="#bdbdbd" stroke-width="1">
+        <line x1="212" y1="52" x2="300" y2="52"/><line x1="212" y1="52" x2="300" y2="95"/><line x1="212" y1="52" x2="300" y2="138"/>
+        <line x1="212" y1="95" x2="300" y2="52"/><line x1="212" y1="95" x2="300" y2="95"/><line x1="212" y1="95" x2="300" y2="138"/>
+        <line x1="212" y1="138" x2="300" y2="52"/><line x1="212" y1="138" x2="300" y2="95"/><line x1="212" y1="138" x2="300" y2="138"/>
+        <line x1="300" y1="52" x2="398" y2="95"/><line x1="300" y1="95" x2="398" y2="95"/><line x1="300" y1="138" x2="398" y2="95"/>
+      </g>
+      <g fill="#D9D9D6" stroke="#888" stroke-width="1.2">
+        <circle cx="212" cy="52" r="9"/><circle cx="212" cy="95" r="9"/><circle cx="212" cy="138" r="9"/>
+        <circle cx="300" cy="52" r="9"/><circle cx="300" cy="95" r="9"/><circle cx="300" cy="138" r="9"/>
+      </g>
+      <circle cx="398" cy="95" r="14" fill="#F4E2DE" stroke="#C0392B" stroke-width="1.8"/>
+      <text x="398" y="100" text-anchor="middle" font-family="'Permanent Marker',cursive" font-size="14" fill="#C0392B">AI</text>
+      <text x="300" y="176" text-anchor="middle" font-family="'Permanent Marker',cursive" font-size="13" fill="#565656">a neural network</text>
+    </svg>
+    <figcaption>A little vector of numbers, fed into the network — the whole field starts here.</figcaption>
+  </figure>
+</section>
+
+<!-- 2 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Two · why numbers</div>
+  <h2>A machine only speaks numbers</h2>
+  <p>People say it like a slogan — "computers don't understand words, only numbers" — and then move right along. Let's actually sit with <em>why</em>, because it's the hinge the whole lecture swings on.</p>
+  <p>Go down. Past the apps, past the operating system, into the chip itself. A processor is built out of transistors, and a transistor is, at its heart, a switch: on, or off. Call them 1 and 0. Wire a handful together and you can build logic; wire that logic into an arithmetic unit and you get a machine that can do exactly two things to numbers — <em>add</em> them and <em>multiply</em> them. (Everything else you've ever heard of — subtraction, division, the entire tower — is built back up out of just those two.)</p>
+  <p>That is the complete vocabulary of the machine. Numbers in; add and multiply; numbers out. So if you want a computer to so much as touch a poem, a face, a song, or a film, you have no choice in the matter. You must first turn it into numbers. There is no other door in.</p>
+  <figure class="reveal"><img class="fig" src="figures/l4/l4-03-only-numbers.png" alt="A processor can only add and multiply numbers"><div class="fig-missing">figure generating…</div></figure>
+  <figure class="reveal"><img class="fig" src="figures/l4/l4-04-everything-numbers.png" alt="Every kind of media must first become numbers"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 3 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Three · the four media</div>
+  <h2>Four rivers, one move</h2>
+  <p>Now look at where we've actually arrived. Four great rivers of human media — text, images, audio, video — and for each one we now have machines that don't merely process it but <em>create</em> it. Language models write. Diffusion models paint. New models generate whole videos, and conjure voices and music out of silence.</p>
+  <p>It feels like four separate miracles. It isn't. It is one move, made four times over — and the move is hiding in the step nobody bothers to put on the poster.</p>
+  <figure class="reveal">
+    <svg viewBox="0 0 460 252" style="width:100%;max-width:480px;display:block;margin:1.8rem auto" role="img" aria-label="Four media: text, image, audio, video">
+      <rect x="18" y="18" width="204" height="100" rx="12" fill="#fff" stroke="#C0392B" stroke-width="2.4"/>
+      <g stroke="#1A1A1A" stroke-width="2" stroke-linecap="round"><line x1="48" y1="48" x2="150" y2="48"/><line x1="48" y1="62" x2="172" y2="62"/><line x1="48" y1="76" x2="150" y2="76"/><line x1="48" y1="90" x2="120" y2="90"/></g>
+      <text x="120" y="135" text-anchor="middle" font-family="'Permanent Marker',cursive" font-size="15" fill="#1A1A1A">TEXT</text>
+      <rect x="238" y="18" width="204" height="100" rx="12" fill="#fff" stroke="#cfcfcf" stroke-width="1.5"/>
+      <rect x="296" y="36" width="88" height="64" rx="4" fill="#EEF3F9" stroke="#3B6EA5" stroke-width="1.5"/>
+      <circle cx="316" cy="56" r="7" fill="#D9D9D6"/><polygon points="300,98 332,62 360,98" fill="#D9D9D6"/><polygon points="344,98 372,72 384,98" fill="#cdd6c4"/>
+      <text x="340" y="135" text-anchor="middle" font-family="'Permanent Marker',cursive" font-size="15" fill="#1A1A1A">IMAGE</text>
+      <rect x="18" y="134" width="204" height="100" rx="12" fill="#fff" stroke="#cfcfcf" stroke-width="1.5"/>
+      <polyline points="40,184 56,184 64,158 76,210 88,166 100,196 112,176 124,184 200,184" fill="none" stroke="#3B6EA5" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+      <text x="120" y="251" text-anchor="middle" font-family="'Permanent Marker',cursive" font-size="15" fill="#1A1A1A">AUDIO</text>
+      <rect x="238" y="134" width="204" height="100" rx="12" fill="#fff" stroke="#cfcfcf" stroke-width="1.5"/>
+      <rect x="286" y="156" width="108" height="56" rx="3" fill="#D9D9D6" stroke="#888"/><g fill="#fff"><rect x="290" y="160" width="8" height="8"/><rect x="290" y="200" width="8" height="8"/><rect x="382" y="160" width="8" height="8"/><rect x="382" y="200" width="8" height="8"/></g>
+      <polygon points="330,170 330,198 354,184" fill="#C0392B"/>
+      <text x="340" y="251" text-anchor="middle" font-family="'Permanent Marker',cursive" font-size="15" fill="#1A1A1A">VIDEO</text>
+    </svg>
+    <figcaption>Four kinds of media — text, image, audio, video.</figcaption>
+  </figure>
+  <figure class="reveal"><img class="fig" src="figures/l4/l4-06-ai-generates.png" alt="AI now creates text, images, video and audio"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 4 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Four · the one trick</div>
+  <h2>Everything becomes a vector</h2>
+  <p>Here is the move. Before any clever model gets to do a single thing, every piece of media is first turned into <em>vectors</em> — lists of numbers — that live in a shared kind of space. Once it's vectors, the machine can add and multiply to its heart's content. Let's watch it happen, the same way, for all four.</p>
+
+  <h3><span class="b">Text</span> — tokenize, then look up a vector</h3>
+  <p>You can't hand a model a sentence; you hand it numbers. First you <em>tokenize</em>: chop the text into tokens, the atoms of language. Usually these are <em>subwords</em> — "tokenization" becomes "token" + "ization." You could chop finer, at the character level, or coarser, keeping whole words; and exactly how finely you cut is a real, under-loved research question that quietly shapes everything downstream.</p>
+  <figure class="reveal">
+    <svg viewBox="0 0 480 200" style="width:100%;max-width:500px;display:block;margin:1.8rem auto" role="img" aria-label="A sentence split into tokens, and a word split into subwords">
+      <g font-family="'Permanent Marker',cursive" font-size="15" fill="#28405c">
+        <rect x="14" y="26" width="58" height="34" rx="7" fill="#EEF3F9" stroke="#3B6EA5" stroke-width="1.5"/><text x="43" y="49" text-anchor="middle">the</text>
+        <rect x="80" y="26" width="58" height="34" rx="7" fill="#EEF3F9" stroke="#3B6EA5" stroke-width="1.5"/><text x="109" y="49" text-anchor="middle">cat</text>
+        <rect x="146" y="26" width="58" height="34" rx="7" fill="#EEF3F9" stroke="#3B6EA5" stroke-width="1.5"/><text x="175" y="49" text-anchor="middle">sat</text>
+        <rect x="212" y="26" width="50" height="34" rx="7" fill="#EEF3F9" stroke="#3B6EA5" stroke-width="1.5"/><text x="237" y="49" text-anchor="middle">on</text>
+        <rect x="270" y="26" width="58" height="34" rx="7" fill="#EEF3F9" stroke="#3B6EA5" stroke-width="1.5"/><text x="299" y="49" text-anchor="middle">the</text>
+        <rect x="336" y="26" width="58" height="34" rx="7" fill="#EEF3F9" stroke="#3B6EA5" stroke-width="1.5"/><text x="365" y="49" text-anchor="middle">mat</text>
+      </g>
+      <text x="240" y="92" text-anchor="middle" font-family="'Permanent Marker',cursive" font-size="14" fill="#565656">and a long word splits into sub-words:</text>
+      <g font-family="ui-monospace,monospace" font-size="17">
+        <rect x="118" y="118" width="110" height="46" rx="9" fill="#EEF3F9" stroke="#3B6EA5" stroke-width="1.6"/><text x="173" y="147" text-anchor="middle" fill="#28405c">token</text>
+        <rect x="252" y="118" width="120" height="46" rx="9" fill="#EEF3F9" stroke="#3B6EA5" stroke-width="1.6"/><text x="312" y="147" text-anchor="middle" fill="#28405c">ization</text>
+      </g>
+      <line x1="240" y1="110" x2="240" y2="172" stroke="#C0392B" stroke-width="3" stroke-dasharray="4 4"/>
+      <text x="240" y="190" text-anchor="middle" font-family="'Permanent Marker',cursive" font-size="13" fill="#C0392B">"tokenization" → token + ization</text>
+    </svg>
+    <figcaption>Step 1: break the text into tokens — the atoms of language.</figcaption>
+  </figure>
+  <figure class="reveal"><img class="fig" src="figures/l4/l4-08-tokenization-levels.png" alt="Character, subword, and word level tokenization"><div class="fig-missing">figure generating…</div></figure>
+  <p>Then comes the vector. You keep a giant <em>token embedding matrix</em> — one row per token in the vocabulary, each row a vector of numbers — and to turn a token into a vector, you simply look up its row. The beautiful part: those numbers aren't hand-set. They start random and get <em>trained</em>, like the knobs from Lecture 2, until tokens that mean similar things drift to similar vectors. Click a token and see the numbers it becomes:</p>
+  <div class="tokwrap reveal" id="tokdemo">
+    <div class="tokhint">click a token ↓</div>
+    <div class="tokrow" id="tok-row"></div>
+    <div class="tokout" id="tok-out"></div>
+  </div>
+  <figure class="reveal"><img class="fig" src="figures/l4/l4-09-embedding-matrix.png" alt="The token embedding matrix: look up a row to get a vector"><div class="fig-missing">figure generating…</div></figure>
+  <figure class="reveal"><img class="fig" src="figures/l4/l4-10-embeddings-trained.png" alt="The embedding vectors are learned like knobs"><div class="fig-missing">figure generating…</div></figure>
+
+  <h3><span class="b">Images</span> — pixels, then patches</h3>
+  <p>An image is already almost numbers. It's a grid of pixels, and each pixel is just a few values — how much red, how much green, how much blue. Stack them up and a photo is, quite literally, a matrix of numbers.</p>
+  <figure class="reveal"><img class="fig" src="figures/l4/l4-11-image-pixels.png" alt="An image is a matrix of pixel numbers"><div class="fig-missing">figure generating…</div></figure>
+  <p>Modern vision models take one more step: they cut the image into small square <em>patches</em>, flatten each patch into a vector, and treat those patch-vectors as tokens — exactly like words. An image becomes a sentence of patches.</p>
+  <figure class="reveal"><img class="fig" src="figures/l4/l4-12-image-patches.png" alt="Image patches are flattened into vectors"><div class="fig-missing">figure generating…</div></figure>
+
+  <h3><span class="b">Audio</span> — a wave, then a codec</h3>
+  <p>Sound is a wave — air pressure wiggling in time — and the first thing we do is sample that wiggle into numbers. But the modern trick is lovelier than that. A <em>neural codec</em> (SoundStream, EnCodec, and their newer cousins) runs the waveform through a convolutional encoder down to a slow stream of latent vectors, then squeezes each one through <em>residual vector quantization</em>: a stack of codebooks where each codebook cleans up the leftover error of the one before it. Out the other end, the sound is a tidy sequence of discrete <em>audio tokens</em> — turned into tokens, just like text.</p>
+  <figure class="reveal"><img class="fig" src="figures/l4/l4-13-audio-waveform.png" alt="Audio starts as a wave sampled into numbers"><div class="fig-missing">figure generating…</div></figure>
+  <figure class="reveal"><img class="fig" src="figures/l4/l4-14-audio-tokens.png" alt="A neural codec turns audio into discrete tokens via residual vector quantization"><div class="fig-missing">figure generating…</div></figure>
+
+  <h3><span class="b">Video</span> — spacetime patches</h3>
+  <p>The hardest-looking medium, and the same idea once more. A video is a stack of frames over time. The modern tokenizers — the kind behind systems like Sora — first compress the video into a smaller latent volume in <em>space and time</em> with a 3D encoder, then slice that volume into <em>spacetime patches</em>: little cubes, each spanning a patch of the picture and a few frames at once. Flatten every cube into a vector, and frames-over-time become a sequence of patch-tokens.</p>
+  <figure class="reveal">
+    <svg viewBox="0 0 460 180" style="width:100%;max-width:460px;display:block;margin:1.8rem auto" role="img" aria-label="A stack of video frames over time">
+      <g>
+        <g transform="translate(0,0)"><rect x="30" y="44" width="120" height="84" rx="6" fill="#fff" stroke="#888" stroke-width="1.4"/><polygon points="42,120 70,90 92,120" fill="#D9D9D6"/><circle cx="60" cy="70" r="8" fill="#EEF3F9"/></g>
+        <g transform="translate(46,16)"><rect x="30" y="44" width="120" height="84" rx="6" fill="#fff" stroke="#888" stroke-width="1.4"/><polygon points="42,120 74,86 96,120" fill="#D9D9D6"/><circle cx="58" cy="70" r="8" fill="#EEF3F9"/></g>
+        <g transform="translate(92,32)"><rect x="30" y="44" width="120" height="84" rx="6" fill="#fff" stroke="#888" stroke-width="1.4"/><polygon points="42,120 78,82 100,120" fill="#D9D9D6"/><circle cx="56" cy="70" r="8" fill="#EEF3F9"/></g>
+        <g transform="translate(138,48)"><rect x="30" y="44" width="120" height="84" rx="6" fill="#fff" stroke="#888" stroke-width="1.4"/><polygon points="42,120 82,78 104,120" fill="#D9D9D6"/><circle cx="54" cy="70" r="8" fill="#EEF3F9"/></g>
+      </g>
+      <line x1="40" y1="160" x2="380" y2="160" stroke="#C0392B" stroke-width="3"/><polygon points="386,160 372,153 372,167" fill="#C0392B"/>
+      <text x="210" y="178" text-anchor="middle" font-family="'Permanent Marker',cursive" font-size="13" fill="#C0392B">time →</text>
+    </svg>
+    <figcaption>A video is just frames, stacked over time.</figcaption>
+  </figure>
+  <figure class="reveal">
+    <svg viewBox="0 0 490 210" style="width:100%;max-width:500px;display:block;margin:1.8rem auto" role="img" aria-label="Video frames compressed by a 3D encoder into spacetime patches, then vectors">
+      <g><rect x="14" y="60" width="58" height="44" rx="4" fill="#fff" stroke="#888"/><rect x="22" y="52" width="58" height="44" rx="4" fill="#fff" stroke="#888"/><rect x="30" y="44" width="58" height="44" rx="4" fill="#fff" stroke="#888"/><polygon points="36,84 52,66 64,84" fill="#D9D9D6"/></g>
+      <text x="50" y="124" text-anchor="middle" font-family="'Permanent Marker',cursive" font-size="12" fill="#565656">frames</text>
+      <line x1="92" y1="66" x2="122" y2="66" stroke="#1A1A1A" stroke-width="2"/><polygon points="128,66 116,60 116,72" fill="#1A1A1A"/>
+      <rect x="130" y="40" width="92" height="56" rx="8" fill="#D9D9D6" stroke="#888"/><text x="176" y="64" text-anchor="middle" font-family="'Permanent Marker',cursive" font-size="12" fill="#1A1A1A">3D ENCODER</text><text x="176" y="82" text-anchor="middle" font-family="'Permanent Marker',cursive" font-size="11" fill="#565656">(VAE)</text>
+      <line x1="226" y1="66" x2="256" y2="66" stroke="#1A1A1A" stroke-width="2"/><polygon points="262,66 250,60 250,72" fill="#1A1A1A"/>
+      <g stroke="#888" stroke-width="1.2">
+        <rect x="266" y="40" width="26" height="26" fill="#EEF3F9"/><rect x="292" y="40" width="26" height="26" fill="#EEF3F9"/><rect x="318" y="40" width="26" height="26" fill="#EEF3F9"/>
+        <rect x="266" y="66" width="26" height="26" fill="#C0392B" stroke="#8a2a20"/><rect x="292" y="66" width="26" height="26" fill="#EEF3F9"/><rect x="318" y="66" width="26" height="26" fill="#EEF3F9"/>
+        <rect x="266" y="92" width="26" height="26" fill="#EEF3F9"/><rect x="292" y="92" width="26" height="26" fill="#EEF3F9"/><rect x="318" y="92" width="26" height="26" fill="#EEF3F9"/>
+      </g>
+      <text x="305" y="136" text-anchor="middle" font-family="'Permanent Marker',cursive" font-size="12" fill="#565656">spacetime patches</text>
+      <line x1="348" y1="79" x2="378" y2="79" stroke="#C0392B" stroke-width="2.4"/><polygon points="384,79 372,73 372,85" fill="#C0392B"/>
+      <rect x="388" y="44" width="40" height="70" rx="8" fill="#EEF3F9" stroke="#3B6EA5" stroke-width="1.6"/>
+      <g font-family="ui-monospace,monospace" font-size="11" fill="#3B6EA5" text-anchor="middle"><text x="408" y="62">0.4</text><text x="408" y="80">0.9</text><text x="408" y="98">0.2</text></g>
+      <text x="408" y="134" text-anchor="middle" font-family="'Permanent Marker',cursive" font-size="12" fill="#565656">vector</text>
+    </svg>
+    <figcaption>Compress in space + time, slice into spacetime patches, flatten each into a vector.</figcaption>
+  </figure>
+
+  <p>Four media. One trick, four times: tokenize, then embed into vectors. And after that step — text, image, audio, video — it is all, blessedly, the same machine.</p>
+</section>
+
+<!-- 5 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Five · the move to keep</div>
+  <h2>Watch what happens before the model</h2>
+  <p>So here is the mental model to carry with you, and it's almost embarrassingly practical. Everyone stares at the model. The architecture, the parameter count, the leaderboard — that's where the attention and the hype pour in. But the model never actually touches your data. It only ever touches the <em>vectors</em>.</p>
+  <p>Which means a huge amount of the outcome is decided <em>before the model runs at all</em> — in the tokenizer, in how you chop and embed your media. Master this one idea and your eyes go somewhere different from everyone else's: when something isn't working, you look at the vectorization first. How is the text tokenized? Are the image patches the right size? Is the audio codec throwing away the very thing you cared about?</p>
+  <figure class="reveal"><img class="fig" src="figures/l4/l4-17-before-the-model.png" alt="The vectorization step happens before the model"><div class="fig-missing">figure generating…</div></figure>
+  <p>More often than people expect, the breakthrough was never a fancier model. It was a better way of turning the world into vectors — and almost nobody was looking there.</p>
+  <figure class="reveal">
+    <svg viewBox="0 0 470 220" style="width:100%;max-width:500px;display:block;margin:1.8rem auto" role="img" aria-label="Two screens: the tokenizer glowing red, the model in gray">
+      <rect x="36" y="56" width="150" height="100" rx="10" fill="#fff" stroke="#C0392B" stroke-width="3"/>
+      <rect x="36" y="56" width="150" height="100" rx="10" fill="none" stroke="#C0392B" stroke-width="7" opacity="0.18"/>
+      <rect x="100" y="156" width="22" height="16" fill="#D9D9D6" stroke="#C0392B"/><rect x="86" y="172" width="50" height="6" rx="3" fill="#D9D9D6" stroke="#C0392B"/>
+      <text x="111" y="98" text-anchor="middle" font-family="'Permanent Marker',cursive" font-size="14" fill="#C0392B">TOKENIZER</text>
+      <text x="111" y="120" text-anchor="middle" font-family="'Permanent Marker',cursive" font-size="11" fill="#565656">tokenize + embed</text>
+      <text x="111" y="40" text-anchor="middle" font-family="'Permanent Marker',cursive" font-size="12.5" fill="#C0392B">look here first ✓</text>
+      <rect x="284" y="56" width="150" height="100" rx="10" fill="#fff" stroke="#9aa0a6" stroke-width="2"/>
+      <rect x="348" y="156" width="22" height="16" fill="#D9D9D6" stroke="#9aa0a6"/><rect x="334" y="172" width="50" height="6" rx="3" fill="#D9D9D6" stroke="#9aa0a6"/>
+      <text x="359" y="110" text-anchor="middle" font-family="'Permanent Marker',cursive" font-size="16" fill="#565656">THE MODEL</text>
+      <text x="359" y="40" text-anchor="middle" font-family="'Permanent Marker',cursive" font-size="12.5" fill="#9B9B9B">everyone stares here</text>
+      <line x1="190" y1="106" x2="280" y2="106" stroke="#3B6EA5" stroke-width="2.2"/><polygon points="286,106 274,100 274,112" fill="#3B6EA5"/>
+      <text x="235" y="98" text-anchor="middle" font-family="ui-monospace,monospace" font-size="11" fill="#3B6EA5">vectors</text>
+    </svg>
+    <figcaption>The model only ever sees vectors — so look at the tokenizer first.</figcaption>
+  </figure>
+  <div class="takeaway">
+    <div class="t">the move to keep</div>
+    <p>Before you touch the model, look at how the world became vectors. Tokenization and embedding quietly decide more than the architecture ever will — and that's exactly where almost nobody is looking. So look there first.</p>
+  </div>
+</section>
+
+<hr class="rule" style="margin-top:2rem">
+<footer class="wrap reveal">
+  <div class="next">Next time — Compression.</div>
+  <div class="sig">The Great Mental Models of Artificial Intelligence</div>
+</footer>
+
+<script>
+  var bar=document.getElementById('bar');
+  function onScroll(){var h=document.documentElement;bar.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';}
+  document.addEventListener('scroll',onScroll,{passive:true});onScroll();
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:0.08,rootMargin:'0px 0px -5% 0px'});
+  document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});
+  document.querySelectorAll('img.fig').forEach(function(img){img.addEventListener('error',function(){img.style.display='none';var p=img.nextElementSibling;if(p)p.style.display='block';});});
+  // interactive token -> vector
+  (function(){
+    var toks=[['Vec',1842],['tors',7013],['all',544],['the',262],['way',1095],['down',2335]];
+    var row=document.getElementById('tok-row'),out=document.getElementById('tok-out');
+    if(!row)return;
+    function vecFor(s){var h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=(h*16777619)>>>0;}
+      var v=[];for(var k=0;k<8;k++){h=(h*1103515245+12345)>>>0;v.push((((h>>>8)%2000)/1000-1).toFixed(2));}return v;}
+    toks.forEach(function(tk){var b=document.createElement('button');
+      b.textContent=tk[0];
+      b.onclick=function(){
+        [].forEach.call(row.children,function(c){c.style.background='';c.style.borderColor='';c.style.color='';});
+        b.style.background='#C0392B';b.style.borderColor='#C0392B';b.style.color='#fff';
+        out.innerHTML='token <b>#'+tk[1]+'</b> &nbsp;→&nbsp; [ '+vecFor(tk[0]).join(',&nbsp; ')+', &nbsp;… ]';
+      };
+      row.appendChild(b);});
+    row.firstChild.click();
+  })();
+</script>
+</body>
+</html>
