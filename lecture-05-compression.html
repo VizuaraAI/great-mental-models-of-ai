@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compression · The Great Mental Models of AI · Lecture Five</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Permanent+Marker&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFFFFF; --ink:#1A1A1A; --muted:#565656; --faint:#9B9B9B;
+    --accent:#C0392B; --accent-soft:#F4E2DE; --blue:#3B6EA5; --blue-soft:#EEF3F9; --line:#ECECEC; --gray:#D9D9D6; --maxw:720px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:Inter,system-ui,sans-serif; font-size:18px; line-height:1.78; -webkit-font-smoothing:antialiased}
+  .mk{font-family:'Permanent Marker',cursive; font-weight:400}
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 28px}
+  .bar{position:fixed; top:0; left:0; height:3px; width:0; background:var(--accent); z-index:50}
+  .rule{height:1px; background:var(--line); border:0; margin:0}
+  a{color:var(--accent)}
+
+  header{min-height:90vh; display:flex; flex-direction:column; justify-content:center; padding:7vh 0 5vh}
+  .kicker{font-family:'Permanent Marker',cursive; font-size:14px; letter-spacing:.04em; color:var(--accent)}
+  h1{font-family:'Permanent Marker',cursive; font-weight:400; font-size:clamp(46px,8.4vw,80px); line-height:1.04; margin:.7rem 0 0}
+  h1 .red{color:var(--accent)}
+  .sub{font-size:20px; color:var(--muted); margin-top:1.6rem; max-width:42ch}
+  .scrollcue{font-family:'Permanent Marker',cursive; margin-top:3rem; font-size:15px; color:var(--faint)}
+
+  section{padding:2.6rem 0}
+  .sec-kicker{font-family:'Permanent Marker',cursive; font-size:15px; color:var(--faint)}
+  h2{font-family:'Permanent Marker',cursive; font-weight:400; font-size:clamp(28px,4.8vw,40px); line-height:1.1; margin:.2rem 0 1.1rem}
+  p{margin:0 0 1.15rem}
+  .lead{font-size:20px}
+  .drop::first-letter{font-family:'Permanent Marker',cursive; float:left; font-size:3.3em; line-height:.82; padding:.06em .14em 0 0; color:var(--accent)}
+  .eq{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.92em; background:var(--blue-soft); border:1px solid #d9e3ef; border-radius:6px; padding:.08em .4em; white-space:nowrap; color:#28405c}
+  .eqblock{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:16px; background:var(--blue-soft); border:1px solid #d9e3ef; border-radius:10px; padding:1rem; margin:1.2rem 0; text-align:center; color:#28405c}
+  .eqblock b{color:var(--accent)}
+
+  figure{margin:2rem 0 .4rem}
+  figure img{display:block; width:100%; max-width:620px; margin:0 auto; height:auto; border-radius:8px}
+  figcaption{font-size:13px; color:var(--faint); text-align:center; margin-top:.5rem; max-width:46ch; margin-left:auto; margin-right:auto}
+  .fig-missing{display:none; max-width:620px; margin:0 auto; border:2px dashed var(--line); border-radius:10px; padding:3rem 1rem; text-align:center; color:var(--faint); font-family:'Permanent Marker',cursive}
+
+  .thesis{border:2px solid var(--accent); border-radius:16px; padding:1.4rem 1.6rem; margin:2rem 0; background:#fff}
+  .thesis .t{font-family:'Permanent Marker',cursive; color:var(--accent); font-size:18px; margin-bottom:.5rem}
+  .thesis p{margin:0; font-size:19px}
+  .takeaway{background:var(--accent-soft); border-radius:16px; padding:1.4rem 1.6rem; margin:2rem 0}
+  .takeaway .t{font-family:'Permanent Marker',cursive; font-size:16px; color:var(--accent); margin-bottom:.4rem}
+  .takeaway p{margin:0}
+
+  .anim{width:100%; max-width:460px; height:auto; display:block; margin:1.8rem auto .2rem}
+  .alab{font-family:'Permanent Marker',cursive; font-size:12px; fill:var(--muted)}
+  .draw{stroke-dasharray:520; stroke-dashoffset:520}
+  .reveal.in .draw{animation:draw 1.8s ease forwards}
+  @keyframes draw{to{stroke-dashoffset:0}}
+
+  .knobrow{display:flex; align-items:center; gap:12px; max-width:400px; margin:.2rem auto 0}
+  .knobrow input{flex:1; accent-color:#C0392B; cursor:pointer}
+  .readout{text-align:center; font-family:ui-monospace,monospace; font-size:14px; color:var(--muted); margin-top:.6rem}
+  .readout b{color:var(--accent)}
+
+  .reveal{opacity:0; transform:translateY(16px); transition:opacity .8s ease, transform .8s ease}
+  .reveal.in{opacity:1; transform:none}
+  @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+  footer{padding:5rem 0 7rem; text-align:center}
+  footer .next{font-family:'Permanent Marker',cursive; font-size:22px; color:var(--accent)}
+  footer .sig{margin-top:1.1rem; font-family:'Permanent Marker',cursive; font-size:14px; color:var(--faint)}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+
+<header class="wrap">
+  <div class="kicker reveal">The Great Mental Models of Artificial Intelligence · Lecture Five</div>
+  <h1 class="reveal"><span class="red">Compression</span></h1>
+  <div class="sub reveal">Squeeze something enormous through a narrow waist, work in the small space, then project it back up — and lose far less than you ever feared. The same move, from byte-pair encoding to Stable Diffusion to the latest frontier models.</div>
+  <div class="scrollcue reveal">Scroll slowly ↓</div>
+</header>
+<hr class="rule">
+
+<!-- 1 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">One · the move</div>
+  <h2>The narrow waist</h2>
+  <p class="lead drop">Here is one of the most beautiful, and most repeated, tricks in all of artificial intelligence. You take something enormous — a giant matrix, a high-resolution image, a swelling memory cache — and you force it through a narrow waist, down into a small space. You do your work there, in the small space. And then, when you need the big thing back, you project it up again.</p>
+  <p>The astonishing part isn't the squeezing. The astonishing part is that almost nothing falls out on the way through. You'd expect that crushing a million numbers down to a few hundred would be catastrophic — and it simply isn't. The big thing was never really "full." We'll see exactly why in a moment, but first, feel the shape of it.</p>
+  <figure class="reveal">
+    <svg viewBox="0 0 460 170" class="anim" role="img" aria-label="A wide block squeezed through a narrow waist and expanded back">
+      <g fill="#D9D9D6" stroke="#9a9a9a" stroke-width="1">
+        <rect x="22" y="34" width="20" height="20"/><rect x="22" y="58" width="20" height="20"/><rect x="22" y="82" width="20" height="20"/><rect x="22" y="106" width="20" height="20"/>
+        <rect x="46" y="34" width="20" height="20"/><rect x="46" y="58" width="20" height="20"/><rect x="46" y="82" width="20" height="20"/><rect x="46" y="106" width="20" height="20"/>
+      </g>
+      <path d="M78 40 L196 78 L196 92 L78 130 Z" fill="#F4E2DE" stroke="#C0392B" stroke-width="2"/>
+      <rect x="206" y="74" width="22" height="22" rx="3" fill="#C0392B"/>
+      <path d="M380 40 L262 78 L262 92 L380 130 Z" fill="#F4E2DE" stroke="#C0392B" stroke-width="2"/>
+      <g fill="#D9D9D6" stroke="#9a9a9a" stroke-width="1">
+        <rect x="396" y="34" width="20" height="20"/><rect x="396" y="58" width="20" height="20"/><rect x="396" y="82" width="20" height="20"/><rect x="396" y="106" width="20" height="20"/>
+        <rect x="420" y="34" width="20" height="20"/><rect x="420" y="58" width="20" height="20"/><rect x="420" y="82" width="20" height="20"/><rect x="420" y="106" width="20" height="20"/>
+      </g>
+      <text x="44" y="152" text-anchor="middle" class="alab">big</text>
+      <text x="217" y="152" text-anchor="middle" class="alab" fill="#C0392B">the waist</text>
+      <text x="418" y="152" text-anchor="middle" class="alab">rebuilt</text>
+    </svg>
+    <figcaption>Big → through the narrow waist → big again, and almost nothing is lost.</figcaption>
+  </figure>
+  <figure class="reveal"><img class="fig" src="figures/l5/l5-01-the-waist.png" alt="The narrow waist: compress and reconstruct"><div class="fig-missing">figure generating…</div></figure>
+  <figure class="reveal"><img class="fig" src="figures/l5/l5-03-autoencoder.png" alt="Compress then reconstruct: the autoencoder"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 2 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Two · why it works</div>
+  <h2>It was never really full</h2>
+  <p>Why does crushing a thing barely hurt it? Because big things in the real world are mostly empty of new information. A million-pixel photo of a face is not a million independent facts — change one pixel and you can guess its neighbours; the whole image lives on a thin, curved surface inside the giant space of all possible images. Mathematicians call that surface a <em>manifold</em>, and the same is true of weight matrices: they look enormous, but their rows mostly repeat each other — they are <em>nearly low-rank</em>.</p>
+  <p>So the "few hundred numbers" you keep aren't a lossy summary of a rich thing. They're closer to the <em>real</em> number of knobs the thing had all along. Here — try it yourself. Below is a squiggle that looks genuinely complicated. Drag the slider to keep only the first few "numbers" that describe it, and watch how quickly the red reconstruction snaps onto the original.</p>
+  <div class="reveal" id="rankdemo" style="margin:1.8rem 0">
+    <svg viewBox="0 0 460 200" class="anim" role="img" aria-label="A curve reconstructed from a few numbers">
+      <path id="rk-orig" fill="none" stroke="#c4c4c4" stroke-width="2"/>
+      <path id="rk-rec" fill="none" stroke="#C0392B" stroke-width="2.8" stroke-linejoin="round"/>
+    </svg>
+    <div class="knobrow"><span class="mk" style="font-size:12px;color:var(--faint)">keep few</span><input type="range" id="rk-knob" min="1" max="80" value="4" aria-label="numbers kept"><span class="mk" style="font-size:12px;color:var(--accent)">keep all</span></div>
+    <div class="readout">stored: <b id="rk-kept">4</b> of 80 numbers &nbsp;·&nbsp; reconstruction error: <b id="rk-err">—</b>%</div>
+    <p style="text-align:center;font-size:13px;color:var(--faint);max-width:42ch;margin:.6rem auto 0">A handful of numbers already rebuild the whole squiggle. That's the manifold, made visible.</p>
+  </div>
+  <figure class="reveal"><img class="fig" src="figures/l5/l5-02-manifold.png" alt="Data lying on a low-dimensional manifold"><div class="fig-missing">figure generating…</div></figure>
+  <figure class="reveal"><img class="fig" src="figures/l5/l5-15-low-rank.png" alt="Big matrices are nearly low-rank"><div class="fig-missing">figure generating…</div></figure>
+  <div class="thesis">
+    <div class="t">the compression move</div>
+    <p>When a thing is too big, look for its narrow waist. Squeeze it down to the few dimensions that actually carry the information, work there, and project back up. The real world is far lower-dimensional than it looks.</p>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Three · text</div>
+  <h2>Byte-pair encoding: the oldest trick</h2>
+  <p>Start with the most literal example, because it's the cleanest. Long before deep learning, in 1994, there was a tiny data-compression algorithm called <em>byte-pair encoding</em>. Its rule is almost childishly simple: find the most frequent pair of neighbouring symbols, and replace it with a single new one. Then do it again. And again.</p>
+  <p>Feed it the word "lower" alongside a mountain of text, and it notices that "e" and "r" sit together constantly, so it fuses them into "er"; then "lo" and "w" into "low"; and soon a long string of single letters has collapsed into a handful of reusable chunks. Modern language models borrowed this exact algorithm to build their vocabularies — every token you met in Lecture 4 was carved out this way.</p>
+  <figure class="reveal"><img class="fig" src="figures/l5/l5-04-bpe-merge.png" alt="Byte-pair encoding merges frequent pairs"><div class="fig-missing">figure generating…</div></figure>
+  <p>But notice this is a slightly <em>different</em> flavour of compression from everything that follows. Byte-pair encoding doesn't project anything into a lower dimension and back; it finds a <em>shorter code</em> for the same text by reusing what repeats. It's the "say it briefly" cousin — the Occam's-razor kind. Worth knowing it's there, because it sets up the deeper, geometric kind we turn to now.</p>
+  <figure class="reveal"><img class="fig" src="figures/l5/l5-05-bpe-shortcode.png" alt="A shorter code for the same text"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 4 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Four · images</div>
+  <h2>Stable Diffusion lives in a tiny room</h2>
+  <p>Now the geometric kind, and a gorgeous example of it. Generating an image pixel by pixel is brutally expensive — a 512×512 colour image is over 750,000 numbers, and diffusion has to revisit all of them dozens of times. So Stable Diffusion simply refuses to work there.</p>
+  <p>Instead it keeps a little autoencoder — a VAE — that squeezes the full image down into a compact <em>latent</em> grid, perhaps 64×64×4, roughly fifty times smaller. All the slow, hard work of diffusion — the denoising, the dreaming up of new pictures — happens entirely inside that tiny latent room. Only at the very end does the decoder project the finished latent back up into a full-resolution image. The model paints in a closet and hangs the result on a wall.</p>
+  <figure class="reveal"><img class="fig" src="figures/l5/l5-06-latent-diffusion.png" alt="Stable Diffusion runs diffusion in a small latent space"><div class="fig-missing">figure generating…</div></figure>
+  <p>This single decision — compress first, generate in the latent, decode last — is most of why image generation went from a research curiosity to something that runs on your laptop. The narrow waist bought a fifty-fold discount, and the pictures barely noticed.</p>
+  <figure class="reveal"><img class="fig" src="figures/l5/l5-07-pixel-vs-latent.png" alt="Pixel space versus the much smaller latent space"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 5 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Five · the frontier</div>
+  <h2>MLA: shrinking the memory of an LLM</h2>
+  <p>Here is the same move at the bleeding edge. When a language model generates text, it has to remember every token it has already seen — specifically, a "key" and a "value" vector for each one. This <em>KV cache</em> grows with every single token, and for long conversations it becomes the main thing eating your memory. It's the swelling cache that quietly limits how much context a model can afford.</p>
+  <figure class="reveal"><img class="fig" src="figures/l5/l5-08-kv-cache.png" alt="The KV cache grows with every token"><div class="fig-missing">figure generating…</div></figure>
+  <p>DeepSeek's <em>Multi-head Latent Attention</em> applies our trick exactly. Rather than store the big key and value vectors for every token, it squeezes each one down into a single small <em>latent</em> vector and caches only that. When the model actually needs the keys and values, it projects the little latent back up into the full-size vectors on the fly. The cache shrinks dramatically, the model's quality barely moves — because, once again, those key and value vectors were nearly low-rank all along.</p>
+  <figure class="reveal"><img class="fig" src="figures/l5/l5-09-mla.png" alt="MLA caches a tiny latent and projects back up"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 6 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Six · the purest form</div>
+  <h2>LoRA: compressing the change itself</h2>
+  <p>If you want the move in its purest, most naked form, look at LoRA — the technique nearly everyone uses to fine-tune a giant model on a budget. A modern model's weights live in enormous square matrices. To adapt the model to a new task, you want to <em>change</em> those weights — to add some update matrix the same enormous size. Training that directly would cost a fortune.</p>
+  <p>LoRA's insight is that the update you actually need is nearly low-rank — so don't store it full-size. Force it through a rank-<span class="eq">r</span> waist:</p>
+  <div class="eqblock">ΔW  =  <b>B</b> · <b>A</b>   &nbsp;&nbsp;(d×d  =  d×r  ·  r×d)</div>
+  <figure class="reveal">
+    <svg viewBox="0 0 470 200" class="anim" role="img" aria-label="A big weight update equals a tall matrix times a wide matrix through a small rank r">
+      <rect x="20" y="44" width="96" height="96" rx="4" fill="#D9D9D6" stroke="#888" stroke-width="1.4"/>
+      <text x="68" y="96" text-anchor="middle" font-family="ui-monospace,monospace" font-size="20" fill="#1A1A1A">ΔW</text>
+      <text x="68" y="160" text-anchor="middle" class="alab">d × d  (huge)</text>
+      <text x="138" y="98" text-anchor="middle" font-family="'Permanent Marker',cursive" font-size="24" fill="#565656">=</text>
+      <rect x="170" y="44" width="34" height="96" rx="4" fill="#EEF3F9" stroke="#3B6EA5" stroke-width="1.6"/>
+      <text x="187" y="96" text-anchor="middle" font-family="ui-monospace,monospace" font-size="17" fill="#28405c">B</text>
+      <text x="187" y="160" text-anchor="middle" class="alab">d × r</text>
+      <text x="224" y="98" text-anchor="middle" font-family="'Permanent Marker',cursive" font-size="22" fill="#565656">·</text>
+      <rect x="244" y="76" width="150" height="32" rx="4" fill="#EEF3F9" stroke="#3B6EA5" stroke-width="1.6"/>
+      <text x="319" y="98" text-anchor="middle" font-family="ui-monospace,monospace" font-size="17" fill="#28405c">A</text>
+      <text x="319" y="160" text-anchor="middle" class="alab">r × d</text>
+      <path d="M205 132 C214 150 224 150 233 132" fill="none" stroke="#C0392B" stroke-width="2.4"/>
+      <text x="219" y="184" text-anchor="middle" font-family="'Permanent Marker',cursive" font-size="14" fill="#C0392B">tiny rank r</text>
+    </svg>
+    <figcaption>The whole change to a giant matrix, squeezed through a rank-r waist — a few thousand numbers instead of billions.</figcaption>
+  </figure>
+  <p>You freeze the original billions of weights and train only the skinny pair <span class="eq">A</span> and <span class="eq">B</span> — often a few thousand numbers in place of a few billion. Down to rank <span class="eq">r</span>, back up to full size. It is the compression mental model with nothing else attached: no images, no attention, no story — just a big change, recognised as secretly small.</p>
+  <figure class="reveal"><img class="fig" src="figures/l5/l5-11-lora-freeze.png" alt="Freeze the giant model, train the tiny low-rank pair"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 7 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Seven · the pattern</div>
+  <h2>One move, many arenas</h2>
+  <p>Stand back and the repetition is almost funny. An image, a memory cache, the change to a weight matrix — three completely different things, in three completely different corners of the field, and the exact same gesture in each: pinch it through a narrow waist, do the work small, project it back up. Once you've seen the waist, you start finding it everywhere.</p>
+  <figure class="reveal"><img class="fig" src="figures/l5/l5-14-three-arenas.png" alt="The same narrow-waist move in images, KV cache, and weights"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 8 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Eight · you could have discovered this</div>
+  <h2>World Models: living inside the compressed dream</h2>
+  <p>So let's take the move somewhere it isn't obvious it belongs — and see that you could have reached for it yourself. Reinforcement learning has a brutal version of the bigness problem: an agent learning to play a game has to look at the raw screen, frame after frame, millions of times. Learning directly from all those pixels is painfully slow.</p>
+  <p>The <em>World Models</em> approach does the unthinkably simple thing. It puts a little autoencoder in front of the agent and crushes every game frame down into a tiny latent vector — call it <span class="eq">z</span>, just a few dozen numbers. Then a small predictor learns to dream forward in <span class="eq">z</span>-space ("given this latent and this action, here's the next latent"), and a <em>minuscule</em> controller learns to play using nothing but those latents.</p>
+  <figure class="reveal"><img class="fig" src="figures/l5/l5-12-world-model-encode.png" alt="A game frame compressed into a tiny latent z"><div class="fig-missing">figure generating…</div></figure>
+  <p>The agent never really acts on the world. It acts on a <em>compressed dream</em> of the world — and that turns out to be enough to learn to play, often without touching the real game at all during training. The same modern lineage (PlaNet, Dreamer) builds entire agents that learn almost entirely inside the small latent space. If you'd internalised the compression move, you might have proposed it yourself: the screen is too big, so find its narrow waist, and let the agent live in there.</p>
+  <figure class="reveal"><img class="fig" src="figures/l5/l5-13-world-model-dream.png" alt="The agent learns to act inside the compressed latent dream"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 9 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Nine · the move to keep</div>
+  <h2>When it's too big, find the waist</h2>
+  <p>That's the whole lecture. The next time something in your work is too big — too much memory, too much compute, too many parameters to train, too many pixels to generate — don't accept the bigness. Ask where the narrow waist is. Ask how few numbers really carry the information. Because the answer, far more often than feels possible, is "surprisingly few."</p>
+  <figure class="reveal"><img class="fig" src="figures/l5/l5-16-apply-it.png" alt="When it is too big, find the narrow waist"><div class="fig-missing">figure generating…</div></figure>
+  <div class="takeaway">
+    <div class="t">the move to keep</div>
+    <p>When a thing is too big, find its narrow waist. Real images, real weight matrices, real game screens are far lower-dimensional than they look — so squeeze them down to the few numbers that matter, work there, and project back up. The information rarely goes away. The cost almost always does.</p>
+  </div>
+</section>
+
+<hr class="rule" style="margin-top:2rem">
+<footer class="wrap reveal">
+  <div class="next">Next time — Expressivity.</div>
+  <div class="sig">The Great Mental Models of Artificial Intelligence</div>
+</footer>
+
+<script>
+  var bar=document.getElementById('bar');
+  function onScroll(){var h=document.documentElement;bar.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';}
+  document.addEventListener('scroll',onScroll,{passive:true});onScroll();
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:0.08,rootMargin:'0px 0px -5% 0px'});
+  document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});
+  document.querySelectorAll('img.fig').forEach(function(img){img.addEventListener('error',function(){img.style.display='none';var p=img.nextElementSibling;if(p)p.style.display='block';});});
+  // interactive "keep r numbers" reconstruction (DCT)
+  (function(){
+    var N=80, pad=14, W=460, H=200;
+    var target=[];
+    for(var i=0;i<N;i++){var t=i/N; target.push(0.62*Math.sin(2*Math.PI*t)+0.30*Math.cos(2*Math.PI*2*t+0.6)+0.17*Math.sin(2*Math.PI*4*t)+0.06*Math.sin(2*Math.PI*9*t));}
+    var c=[]; for(var k=0;k<N;k++){var s=0;for(var n=0;n<N;n++){s+=target[n]*Math.cos(Math.PI/N*(n+0.5)*k);}c.push(s);}
+    function recon(r){var out=[];for(var n=0;n<N;n++){var s=c[0]/N;for(var k=1;k<r;k++){s+=(2/N)*c[k]*Math.cos(Math.PI/N*(n+0.5)*k);}out.push(s);}return out;}
+    var mny=-1.3,mxy=1.3;
+    function X(i){return pad+i/(N-1)*(W-2*pad);}
+    function Y(v){return H-pad-((v-mny)/(mxy-mny))*(H-2*pad);}
+    function path(a){var d='M'+X(0).toFixed(1)+' '+Y(a[0]).toFixed(1);for(var i=1;i<N;i++)d+=' L'+X(i).toFixed(1)+' '+Y(a[i]).toFixed(1);return d;}
+    var orig=document.getElementById('rk-orig'),rec=document.getElementById('rk-rec'),knob=document.getElementById('rk-knob'),kept=document.getElementById('rk-kept'),err=document.getElementById('rk-err');
+    if(!orig)return;
+    orig.setAttribute('d',path(target));
+    function upd(){var r=+knob.value,a=recon(r);rec.setAttribute('d',path(a));
+      var e=0,tot=0;for(var i=0;i<N;i++){e+=(a[i]-target[i])*(a[i]-target[i]);tot+=target[i]*target[i];}
+      kept.textContent=r; err.textContent=Math.round(Math.sqrt(e/tot)*100);}
+    knob.addEventListener('input',upd); knob.value=4; upd();
+  })();
+</script>
+</body>
+</html>
