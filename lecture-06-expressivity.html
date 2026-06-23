@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Expressivity · The Great Mental Models of AI · Lecture Six</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Permanent+Marker&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFFFFF; --ink:#1A1A1A; --muted:#565656; --faint:#9B9B9B;
+    --accent:#C0392B; --accent-soft:#F4E2DE; --blue:#3B6EA5; --blue-soft:#EEF3F9; --line:#ECECEC; --gray:#D9D9D6; --maxw:720px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:Inter,system-ui,sans-serif; font-size:18px; line-height:1.78; -webkit-font-smoothing:antialiased}
+  .mk{font-family:'Permanent Marker',cursive; font-weight:400}
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 28px}
+  .bar{position:fixed; top:0; left:0; height:3px; width:0; background:var(--accent); z-index:50}
+  .rule{height:1px; background:var(--line); border:0; margin:0}
+  a{color:var(--accent)}
+
+  header{min-height:90vh; display:flex; flex-direction:column; justify-content:center; padding:7vh 0 5vh}
+  .kicker{font-family:'Permanent Marker',cursive; font-size:14px; letter-spacing:.04em; color:var(--accent)}
+  h1{font-family:'Permanent Marker',cursive; font-weight:400; font-size:clamp(46px,8.4vw,80px); line-height:1.04; margin:.7rem 0 0}
+  h1 .red{color:var(--accent)}
+  .sub{font-size:20px; color:var(--muted); margin-top:1.6rem; max-width:42ch}
+  .scrollcue{font-family:'Permanent Marker',cursive; margin-top:3rem; font-size:15px; color:var(--faint)}
+
+  section{padding:2.6rem 0}
+  .sec-kicker{font-family:'Permanent Marker',cursive; font-size:15px; color:var(--faint)}
+  h2{font-family:'Permanent Marker',cursive; font-weight:400; font-size:clamp(28px,4.8vw,40px); line-height:1.1; margin:.2rem 0 1.1rem}
+  p{margin:0 0 1.15rem}
+  .lead{font-size:20px}
+  .drop::first-letter{font-family:'Permanent Marker',cursive; float:left; font-size:3.3em; line-height:.82; padding:.06em .14em 0 0; color:var(--accent)}
+  .eq{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.92em; background:var(--blue-soft); border:1px solid #d9e3ef; border-radius:6px; padding:.08em .4em; white-space:nowrap; color:#28405c}
+
+  figure{margin:2rem 0 .4rem}
+  figure img{display:block; width:100%; max-width:620px; margin:0 auto; height:auto; border-radius:8px}
+  figcaption{font-size:13px; color:var(--faint); text-align:center; margin-top:.5rem; max-width:46ch; margin-left:auto; margin-right:auto}
+  .fig-missing{display:none; max-width:620px; margin:0 auto; border:2px dashed var(--line); border-radius:10px; padding:3rem 1rem; text-align:center; color:var(--faint); font-family:'Permanent Marker',cursive}
+
+  .thesis{border:2px solid var(--accent); border-radius:16px; padding:1.4rem 1.6rem; margin:2rem 0; background:#fff}
+  .thesis .t{font-family:'Permanent Marker',cursive; color:var(--accent); font-size:18px; margin-bottom:.5rem}
+  .thesis p{margin:0; font-size:19px}
+  .takeaway{background:var(--accent-soft); border-radius:16px; padding:1.4rem 1.6rem; margin:2rem 0}
+  .takeaway .t{font-family:'Permanent Marker',cursive; font-size:16px; color:var(--accent); margin-bottom:.4rem}
+  .takeaway p{margin:0}
+
+  .anim{width:100%; max-width:440px; height:auto; display:block; margin:1.8rem auto .2rem}
+  .alab{font-family:'Permanent Marker',cursive; font-size:12px; fill:var(--muted)}
+  .xline{transform-origin:150px 110px; animation:xspin 5.5s ease-in-out infinite}
+  @keyframes xspin{0%{transform:rotate(20deg)}50%{transform:rotate(115deg)}100%{transform:rotate(20deg)}}
+  @media(prefers-reduced-motion:reduce){.xline{animation:none}}
+
+  .knobrow{display:flex; align-items:center; gap:12px; max-width:400px; margin:.2rem auto 0}
+  .knobrow input{flex:1; accent-color:#C0392B; cursor:pointer}
+  .readout{text-align:center; font-family:ui-monospace,monospace; font-size:14px; color:var(--muted); margin-top:.6rem}
+  .readout b{color:var(--accent)}
+
+  .reveal{opacity:0; transform:translateY(16px); transition:opacity .8s ease, transform .8s ease}
+  .reveal.in{opacity:1; transform:none}
+  @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+  footer{padding:5rem 0 7rem; text-align:center}
+  footer .next{font-family:'Permanent Marker',cursive; font-size:22px; color:var(--accent)}
+  footer .sig{margin-top:1.1rem; font-family:'Permanent Marker',cursive; font-size:14px; color:var(--faint)}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+
+<header class="wrap">
+  <div class="kicker reveal">The Great Mental Models of Artificial Intelligence · Lecture Six</div>
+  <h1 class="reveal"><span class="red">Expressivity</span></h1>
+  <div class="sub reveal">The exact opposite of compression — and just as powerful. When a problem refuses to yield, lift it into a higher dimension, where the pattern finally has room to appear.</div>
+  <div class="scrollcue reveal">Scroll slowly ↓</div>
+</header>
+<hr class="rule">
+
+<!-- 1 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">One · the move</div>
+  <h2>When stuck, go up</h2>
+  <p class="lead drop">A professor of mine at MIT had a way of describing the whole of deep learning in a single sentence: you project things into higher dimensions to find the patterns of intelligence. Whenever you hit a wall, you don't stay and push against it — you lift the problem up, into a space with more room, where the answer was waiting all along.</p>
+  <p>It sounds like the precise opposite of last lecture, and it is. Compression squeezed things <em>down</em> through a narrow waist; expressivity lifts them <em>up</em> into a wider one. Both are true, and a good practitioner keeps both in hand: go down to find the essence, go up to find the pattern. This lecture is about the second move — and about how often a problem that looked impossible was simply being asked in too few dimensions.</p>
+  <figure class="reveal"><img class="fig" src="figures/l6/l6-01-project-up.png" alt="Project the problem up into a higher dimension"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 2 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Two · classification</div>
+  <h2>XOR: the problem with no line</h2>
+  <p>Here is the cleanest possible example. Put four points on a plane. Two of them — call them red — sit on one diagonal; the other two — gray — sit on the other. This is the famous XOR pattern, and it has a humbling property: <em>no straight line can separate the reds from the grays.</em> Try every angle you like; one will always end up on the wrong side. Watch:</p>
+  <figure class="reveal">
+    <svg viewBox="0 0 300 220" class="anim" role="img" aria-label="A line rotating in 2D, always failing to separate the XOR points">
+      <line x1="30" y1="110" x2="270" y2="110" stroke="#e3e3e3" stroke-width="1"/><line x1="150" y1="20" x2="150" y2="200" stroke="#e3e3e3" stroke-width="1"/>
+      <circle cx="78" cy="58" r="11" fill="#C0392B"/><circle cx="222" cy="162" r="11" fill="#C0392B"/>
+      <circle cx="222" cy="58" r="11" fill="#D9D9D6" stroke="#999"/><circle cx="78" cy="162" r="11" fill="#D9D9D6" stroke="#999"/>
+      <line class="xline" x1="150" y1="14" x2="150" y2="206" stroke="#1A1A1A" stroke-width="2.4" stroke-dasharray="6 5"/>
+      <text x="150" y="216" text-anchor="middle" class="alab">no line ever splits them</text>
+    </svg>
+    <figcaption>In 2D, every straight line gets at least one point wrong. The problem is genuinely unsolvable here.</figcaption>
+  </figure>
+  <figure class="reveal"><img class="fig" src="figures/l6/l6-03-xor-2d.png" alt="The XOR points cannot be separated by a line in 2D"><div class="fig-missing">figure generating…</div></figure>
+  <p>Now do the magic trick. Lift the four points off the flat page into three dimensions — give the two red points a little height, raise them up on a new axis. Suddenly the reds float above and the grays stay below, and a single flat <em>plane</em> slides cleanly between them. The very same data, the very same question, becomes trivially separable — just by adding a dimension.</p>
+  <figure class="reveal"><img class="fig" src="figures/l6/l6-04-xor-3d.png" alt="Lifted to 3D, a plane separates the XOR points"><div class="fig-missing">figure generating…</div></figure>
+  <p>This isn't a one-off trick; it's a theorem with a name. The <em>kernel trick</em> behind support vector machines says: take data that's tangled in low dimensions, map it up into a much higher-dimensional space, and there it becomes linearly separable. Lift high enough and a straight boundary always exists. The first time you see it, it feels like cheating. It's just expressivity.</p>
+  <figure class="reveal"><img class="fig" src="figures/l6/l6-05-kernel-trick.png" alt="The kernel trick lifts data until it is linearly separable"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 3 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Three · regression</div>
+  <h2>Some curves need more room</h2>
+  <p>The same story plays out when you're fitting a curve instead of drawing a boundary. Suppose the truth wiggles — it rises and falls a few times. Try to fit it with something too simple and you'll fail, no matter how hard you try. A constant (degree 0) is a flat line; a straight line (degree 1) can only tilt; a parabola (degree 2) can only bow once. None of them has enough <em>expressivity</em> to follow a wiggle.</p>
+  <p>Add degrees — add expressive power — and the curve gains the freedom to bend as many times as it needs. Drag the slider and watch a hopeless straight line grow into a curve that finally catches the pattern:</p>
+  <div class="reveal" id="degdemo" style="margin:1.8rem 0">
+    <svg viewBox="0 0 460 210" class="anim" role="img" aria-label="A polynomial fit of increasing degree">
+      <g id="dg-dots"></g>
+      <path id="dg-fit" fill="none" stroke="#C0392B" stroke-width="2.8" stroke-linejoin="round"/>
+    </svg>
+    <div class="knobrow"><span class="mk" style="font-size:12px;color:var(--faint)">degree 0</span><input type="range" id="dg-knob" min="0" max="14" value="1" aria-label="polynomial degree"><span class="mk" style="font-size:12px;color:var(--accent)">degree 14</span></div>
+    <div class="readout">degree: <b id="dg-deg">1</b> &nbsp;·&nbsp; fit error: <b id="dg-err">—</b>% &nbsp;·&nbsp; <span id="dg-msg" class="mk" style="color:var(--accent)"></span></div>
+  </div>
+  <figure class="reveal"><img class="fig" src="figures/l6/l6-06-degree-ladder.png" alt="Higher degree captures the wiggle"><div class="fig-missing">figure generating…</div></figure>
+  <p>So when a model underperforms, one honest question is simply: is it expressive enough to represent the thing you're asking it to learn? Often the underlying pattern is genuinely complicated, and a richer, higher-dimensional model is exactly what it needs.</p>
+  <figure class="reveal"><img class="fig" src="figures/l6/l6-07-oscillatory.png" alt="A complex oscillatory pattern captured by an expressive model"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 4 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Four · large language models</div>
+  <h2>Where the magic hides in an LLM</h2>
+  <p>Now the grandest stage. As you scale a language model up — more and more parameters, more and more expressive capacity — something uncanny happens. Past certain sizes, abilities that were simply absent begin to appear: following instructions, doing arithmetic, reasoning in steps. We call them <em>emergent</em>, and a large part of why they emerge is raw expressivity: a bigger model can represent functions a smaller one literally cannot.</p>
+  <figure class="reveal"><img class="fig" src="figures/l6/l6-08-emergence.png" alt="Capability jumps as parameters grow"><div class="fig-missing">figure generating…</div></figure>
+  <p>But here's the part most people skip past. Zoom inside a transformer block and you'll find two very different organs. One is <em>attention</em>, which mixes information between tokens — it handles context. The other, sitting right after it, is the humble <em>feed-forward network</em> (FFN), and it does something else entirely.</p>
+  <figure class="reveal"><img class="fig" src="figures/l6/l6-09-transformer-block.png" alt="Inside a transformer block: attention and the feed-forward network"><div class="fig-missing">figure generating…</div></figure>
+  <p>The feed-forward layer doesn't look at other tokens at all. It takes each token's vector on its own, and does exactly our move: it <em>projects it up</em> into a much wider space — typically about four times wider — runs a nonlinearity there, and then projects it back down. Up to be expressive, back down to fit. It is the narrow waist of compression run in reverse, and it's where a huge fraction of the model's parameters — and, the evidence suggests, much of its stored knowledge — actually live.</p>
+  <figure class="reveal">
+    <svg viewBox="0 0 460 190" class="anim" role="img" aria-label="The feed-forward layer expands a vector to 4x width then back">
+      <rect x="24" y="68" width="30" height="54" rx="5" fill="#EEF3F9" stroke="#3B6EA5" stroke-width="1.6"/>
+      <text x="39" y="142" text-anchor="middle" class="alab" fill="#28405c">d</text>
+      <line x1="58" y1="95" x2="118" y2="95" stroke="#C0392B" stroke-width="3"/><polygon points="124,95 112,89 112,101" fill="#C0392B"/>
+      <text x="90" y="84" text-anchor="middle" class="alab" fill="#C0392B">expand</text>
+      <rect x="130" y="22" width="46" height="146" rx="6" fill="#F4E2DE" stroke="#C0392B" stroke-width="2"/>
+      <text x="153" y="100" text-anchor="middle" class="alab" fill="#C0392B">4d (wide)</text>
+      <text x="153" y="184" text-anchor="middle" class="alab">+ nonlinearity</text>
+      <line x1="182" y1="95" x2="242" y2="95" stroke="#1A1A1A" stroke-width="3"/><polygon points="248,95 236,89 236,101" fill="#1A1A1A"/>
+      <text x="214" y="84" text-anchor="middle" class="alab">project back</text>
+      <rect x="254" y="68" width="30" height="54" rx="5" fill="#EEF3F9" stroke="#3B6EA5" stroke-width="1.6"/>
+      <text x="269" y="142" text-anchor="middle" class="alab" fill="#28405c">d</text>
+      <text x="372" y="98" text-anchor="middle" font-family="'Permanent Marker',cursive" font-size="13" fill="#565656">expressivity,</text>
+      <text x="372" y="116" text-anchor="middle" font-family="'Permanent Marker',cursive" font-size="13" fill="#565656">per token</text>
+    </svg>
+    <figcaption>The FFN: lift each token to ~4× width, apply a nonlinearity, project back. Pure expressivity.</figcaption>
+  </figure>
+  <p>That last claim isn't just a nice story — interpretability work (Geva and colleagues, 2021) found that these feed-forward layers behave like <em>key-value memories</em>: each wide neuron quietly learns to recognise a pattern and write an associated fact. Attention moves information around; the feed-forward layer is where the model is expressive enough to <em>hold</em> it.</p>
+  <figure class="reveal"><img class="fig" src="figures/l6/l6-11-ffn-memory.png" alt="Feed-forward layers behave like key-value memories"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 5 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Five · the caveat</div>
+  <h2>But don't go too high</h2>
+  <p>Expressivity is intoxicating, so here is the warning that keeps it honest. Go back to that degree slider and keep dragging — past the sweet spot, all the way up. The curve stops following the trend and starts <em>chasing the noise</em>, lunging through every single data point and flailing wildly in between. That's overfitting: a model so expressive it memorises the accidents instead of the pattern.</p>
+  <figure class="reveal"><img class="fig" src="figures/l6/l6-12-overfit-curse.png" alt="Too much expressivity overfits the noise"><div class="fig-missing">figure generating…</div></figure>
+  <p>There's a deeper version too, with a wonderfully ominous name: the <em>curse of dimensionality</em>. As you add dimensions, space empties out — your data points scatter further and further apart, and you need exponentially more of them to fill the room. So expressivity is a dial, not a direction: too little and you can't represent the pattern; too much and you drown in space and noise. The art is the sweet spot — and that's exactly where compression's tools (regularisation, the low-rank waist) come back to rein expressivity in.</p>
+  <figure class="reveal"><img class="fig" src="figures/l6/l6-13-sweet-spot.png" alt="Underfit, just right, overfit"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 6 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Six · vision &amp; the physical world</div>
+  <h2>Lifting images, and lifting the weather</h2>
+  <p>The move scales far past toy curves. A convolutional neural network takes a flat image and lifts it into a tall stack of <em>feature maps</em> — dozens, then hundreds, of parallel channels, each responding to a different pattern: edges, then textures, then eyes and wheels. The picture climbs into a high-dimensional space where "cat" and "dog" finally pull apart, exactly like the XOR points did.</p>
+  <figure class="reveal"><img class="fig" src="figures/l6/l6-14-cnn.png" alt="A CNN lifts an image into many feature-map channels"><div class="fig-missing">figure generating…</div></figure>
+  <p>And it reaches well beyond pixels. Think of the climate — a fantastically complicated function from conditions today to weather tomorrow, far too tangled to write down by hand. A neural network, with enough expressive capacity, can <em>approximate</em> that function: feed it the swirling state of the atmosphere and it learns the high-dimensional mapping that classical equations struggle to solve in time. The same instinct — when the function is too complex, use something expressive enough to represent it — is now reshaping weather and climate prediction.</p>
+  <figure class="reveal"><img class="fig" src="figures/l6/l6-15-nn-climate.png" alt="A neural network approximating a complex climate function"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 7 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Seven · one more</div>
+  <h2>Fourier features: lifting the inputs themselves</h2>
+  <p>One last example, because it's a beautiful twist. When researchers tried to teach a small network to represent a detailed 3D scene — the idea behind <em>NeRF</em> — it came out hopelessly blurry. The network simply couldn't capture the sharp, high-frequency detail from raw <span class="eq">(x, y, z)</span> coordinates.</p>
+  <p>The fix was pure expressivity, applied to the <em>input</em>. Before the coordinates ever reach the network, lift them into a high-dimensional bouquet of sines and cosines at many frequencies — Fourier features. In that richer space the network can finally see fine detail, and the blur snaps into crisp, photographic sharpness. They didn't make the network bigger; they made the <em>input</em> more expressive, and that was enough.</p>
+  <figure class="reveal"><img class="fig" src="figures/l6/l6-16-fourier-nerf.png" alt="Fourier features let a network capture sharp high-frequency detail"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 8 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Eight · the move to keep</div>
+  <h2>If you can't solve it, lift it</h2>
+  <p>That's the whole idea, and it's a hopeful one. The next time a problem in AI looks genuinely unsolvable — points that won't separate, a curve that won't fit, a function too tangled to write — don't assume it's impossible. Assume, first, that you're asking it in too few dimensions. Lift it. Give it more room. Make it more expressive, and very often the wall you were pushing against simply isn't there anymore.</p>
+  <figure class="reveal"><img class="fig" src="figures/l6/l6-17-takeaway.png" alt="If you cannot solve it, lift it into a higher dimension"><div class="fig-missing">figure generating…</div></figure>
+  <div class="takeaway">
+    <div class="t">the move to keep</div>
+    <p>When a problem won't yield, project it into a higher dimension, where the pattern has room to appear — the XOR plane, the wiggly fit, the wide feed-forward layer, the stack of feature maps. Just remember the dial cuts both ways: lift enough to represent the truth, not so far that you drown in noise. Expressivity and compression are the two hands of the same craft.</p>
+  </div>
+</section>
+
+<hr class="rule" style="margin-top:2rem">
+<footer class="wrap reveal">
+  <div class="next">The Great Mental Models of Artificial Intelligence.</div>
+  <div class="sig">Expressivity · Lecture Six</div>
+</footer>
+
+<script>
+  var bar=document.getElementById('bar');
+  function onScroll(){var h=document.documentElement;bar.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';}
+  document.addEventListener('scroll',onScroll,{passive:true});onScroll();
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:0.08,rootMargin:'0px 0px -5% 0px'});
+  document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});
+  document.querySelectorAll('img.fig').forEach(function(img){img.addEventListener('error',function(){img.style.display='none';var p=img.nextElementSibling;if(p)p.style.display='block';});});
+  // interactive polynomial-degree fit
+  (function(){
+    var N=22, pad=16, W=460, H=210;
+    var xs=[], ys=[];
+    var noise=[0.05,-0.09,0.12,-0.06,0.10,-0.13,0.04,0.08,-0.11,0.06,-0.05,0.12,-0.08,0.05,-0.10,0.09,-0.04,0.11,-0.07,0.05,-0.09,0.06];
+    for(var i=0;i<N;i++){var x=-1+2*i/(N-1); xs.push(x); ys.push(0.78*Math.sin(3.1*x)+0.16*x+noise[i]);}
+    function fit(d){var m=d+1, P=[]; for(var k=0;k<=2*d;k++){var s=0;for(var i=0;i<N;i++)s+=Math.pow(xs[i],k);P.push(s);}
+      var A=[],b=[];
+      for(var r=0;r<m;r++){A.push([]);var br=0;for(var c=0;c<m;c++)A[r].push(P[r+c]);for(var i=0;i<N;i++)br+=ys[i]*Math.pow(xs[i],r);b.push(br);}
+      for(var col=0;col<m;col++){var piv=col;for(var rr=col+1;rr<m;rr++)if(Math.abs(A[rr][col])>Math.abs(A[piv][col]))piv=rr;
+        var t=A[piv];A[piv]=A[col];A[col]=t;var tb=b[piv];b[piv]=b[col];b[col]=tb;
+        if(Math.abs(A[col][col])<1e-12)continue;
+        for(var rr=0;rr<m;rr++){if(rr===col)continue;var f=A[rr][col]/A[col][col];for(var cc=col;cc<m;cc++)A[rr][cc]-=f*A[col][cc];b[rr]-=f*b[col];}}
+      var coef=[];for(var r=0;r<m;r++)coef.push(Math.abs(A[r][r])<1e-12?0:b[r]/A[r][r]);return coef;}
+    function ev(c,x){var s=0,p=1;for(var k=0;k<c.length;k++){s+=c[k]*p;p*=x;}return s;}
+    var mny=-1.25,mxy=1.25;
+    function X(x){return pad+(x+1)/2*(W-2*pad);}
+    function Y(v){return H-pad-((v-mny)/(mxy-mny))*(H-2*pad);}
+    var g=document.getElementById('dg-dots');
+    if(!g)return;
+    ys.forEach(function(y,i){var c=document.createElementNS('http://www.w3.org/2000/svg','circle');c.setAttribute('cx',X(xs[i]).toFixed(1));c.setAttribute('cy',Y(y).toFixed(1));c.setAttribute('r','4');c.setAttribute('fill','#1A1A1A');g.appendChild(c);});
+    var fitP=document.getElementById('dg-fit'),knob=document.getElementById('dg-knob'),deg=document.getElementById('dg-deg'),errEl=document.getElementById('dg-err'),msg=document.getElementById('dg-msg');
+    function upd(){var d=+knob.value, c=fit(d);
+      var dd='', first=true; for(var s=0;s<=240;s++){var x=-1+2*s/240, y=ev(c,x); var px=X(x), py=Y(Math.max(mny,Math.min(mxy,y))); dd+=(first?'M':' L')+px.toFixed(1)+' '+py.toFixed(1); first=false;}
+      fitP.setAttribute('d',dd);
+      var e=0,tot=0;for(var i=0;i<N;i++){var r=ev(c,xs[i])-ys[i];e+=r*r;tot+=ys[i]*ys[i];}
+      var pct=Math.round(Math.sqrt(e/tot)*100); deg.textContent=d; errEl.textContent=pct;
+      msg.textContent = d<=2 ? '✗ too simple' : (d>=12 ? '✗ overfitting' : '✓ captures it');}
+    knob.addEventListener('input',upd); knob.value=1; upd();
+  })();
+</script>
+</body>
+</html>
