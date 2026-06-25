@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reverse the Corruption · The Great Mental Models of AI · Lecture Seven</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Permanent+Marker&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFFFFF; --ink:#1A1A1A; --muted:#565656; --faint:#9B9B9B;
+    --accent:#C0392B; --accent-soft:#F4E2DE; --blue:#3B6EA5; --blue-soft:#EEF3F9; --line:#ECECEC; --gray:#D9D9D6; --maxw:720px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:Inter,system-ui,sans-serif; font-size:18px; line-height:1.78; -webkit-font-smoothing:antialiased}
+  .mk{font-family:'Permanent Marker',cursive; font-weight:400}
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 28px}
+  .bar{position:fixed; top:0; left:0; height:3px; width:0; background:var(--accent); z-index:50}
+  .rule{height:1px; background:var(--line); border:0; margin:0}
+  a{color:var(--accent)}
+
+  header{min-height:90vh; display:flex; flex-direction:column; justify-content:center; padding:7vh 0 5vh}
+  .kicker{font-family:'Permanent Marker',cursive; font-size:14px; letter-spacing:.04em; color:var(--accent)}
+  h1{font-family:'Permanent Marker',cursive; font-weight:400; font-size:clamp(42px,7.6vw,72px); line-height:1.05; margin:.7rem 0 0}
+  h1 .red{color:var(--accent)}
+  .sub{font-size:20px; color:var(--muted); margin-top:1.6rem; max-width:42ch}
+  .scrollcue{font-family:'Permanent Marker',cursive; margin-top:3rem; font-size:15px; color:var(--faint)}
+
+  section{padding:2.6rem 0}
+  .sec-kicker{font-family:'Permanent Marker',cursive; font-size:15px; color:var(--faint)}
+  h2{font-family:'Permanent Marker',cursive; font-weight:400; font-size:clamp(28px,4.8vw,40px); line-height:1.1; margin:.2rem 0 1.1rem}
+  p{margin:0 0 1.15rem}
+  .lead{font-size:20px}
+  .drop::first-letter{font-family:'Permanent Marker',cursive; float:left; font-size:3.3em; line-height:.82; padding:.06em .14em 0 0; color:var(--accent)}
+  .eq{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.92em; background:var(--blue-soft); border:1px solid #d9e3ef; border-radius:6px; padding:.08em .4em; white-space:nowrap; color:#28405c}
+
+  figure{margin:2rem 0 .4rem}
+  figure img{display:block; width:100%; max-width:620px; margin:0 auto; height:auto; border-radius:8px}
+  figcaption{font-size:13px; color:var(--faint); text-align:center; margin-top:.5rem; max-width:46ch; margin-left:auto; margin-right:auto}
+  .fig-missing{display:none; max-width:620px; margin:0 auto; border:2px dashed var(--line); border-radius:10px; padding:3rem 1rem; text-align:center; color:var(--faint); font-family:'Permanent Marker',cursive}
+
+  .thesis{border:2px solid var(--accent); border-radius:16px; padding:1.4rem 1.6rem; margin:2rem 0; background:#fff}
+  .thesis .t{font-family:'Permanent Marker',cursive; color:var(--accent); font-size:18px; margin-bottom:.5rem}
+  .thesis p{margin:0; font-size:19px}
+  .takeaway{background:var(--accent-soft); border-radius:16px; padding:1.4rem 1.6rem; margin:2rem 0}
+  .takeaway .t{font-family:'Permanent Marker',cursive; font-size:16px; color:var(--accent); margin-bottom:.4rem}
+  .takeaway p{margin:0}
+
+  .knobrow{display:flex; align-items:center; gap:12px; max-width:380px; margin:.2rem auto 0}
+  .knobrow input{flex:1; accent-color:#C0392B; cursor:pointer}
+  .readout{text-align:center; font-family:ui-monospace,monospace; font-size:14px; color:var(--muted); margin-top:.6rem}
+  .readout b{color:var(--accent)}
+
+  .reveal{opacity:0; transform:translateY(16px); transition:opacity .8s ease, transform .8s ease}
+  .reveal.in{opacity:1; transform:none}
+  @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+  footer{padding:5rem 0 7rem; text-align:center}
+  footer .next{font-family:'Permanent Marker',cursive; font-size:22px; color:var(--accent)}
+  footer .sig{margin-top:1.1rem; font-family:'Permanent Marker',cursive; font-size:14px; color:var(--faint)}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+
+<header class="wrap">
+  <div class="kicker reveal">The Great Mental Models of Artificial Intelligence · Lecture Seven</div>
+  <h1 class="reveal">Reverse the <span class="red">Corruption</span></h1>
+  <div class="sub reveal">To learn how to create something, first learn how to destroy it — then run the destruction backward. The strangest, most beautiful generation trick in AI, from images to language to molecules.</div>
+  <div class="scrollcue reveal">Scroll slowly ↓</div>
+</header>
+<hr class="rule">
+
+<!-- 1 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">One · the strange idea</div>
+  <h2>To create, first destroy</h2>
+  <p class="lead drop">Suppose I asked you to invent a way for a machine to paint a brand-new picture from nothing. You would probably try to teach it to draw — to lay down strokes, build up shapes, add detail. You almost certainly would not say: "First, let's teach it to take a finished painting and slowly smear it into meaningless static."</p>
+  <p>And yet that backwards-sounding idea is exactly how nearly every AI image, video, and increasingly even AI <em>text</em> is now created. It's called diffusion, and the first time it clicks, it feels like a magic trick. The plan is this: take real things, destroy them gently and gradually into noise, learn to undo that destruction one tiny step at a time — and then, starting from pure noise, run the undo until something new walks out.</p>
+  <figure class="reveal"><img class="fig" src="figures/l7/l7-01-create-destroy.png" alt="To create, first destroy"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 2 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Two · the easy half</div>
+  <h2>Step one: destroy it</h2>
+  <p>Start with the easy, almost silly part. Take a clear photograph and add a tiny sprinkle of random noise — barely visible. Now add a little more. And more. Keep going, dozens or hundreds of times, and the picture dissolves: first grainy, then murky, then gone entirely, until you're staring at a screen of pure television static with no trace of the original.</p>
+  <p>This "forward process" is trivial — anyone can corrupt an image; it takes no intelligence at all. But it has one priceless property: at every single step, you know <em>exactly</em> what noise you added. You destroyed the picture, but you kept the receipts.</p>
+  <figure class="reveal"><img class="fig" src="figures/l7/l7-02-forward-noise.png" alt="The forward process: add noise step by step until pure static"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 3 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Three · the learned half</div>
+  <h2>Step two: learn to undo one step</h2>
+  <p>Now the only part that requires learning. Show a network a slightly-noisy image and ask it a single, narrow question: <em>what noise was just added?</em> Because you kept the receipts, you can grade its answer perfectly. Subtract the noise it predicts, and you get a slightly cleaner image back.</p>
+  <p>That's the whole training task — not "paint a masterpiece," just "undo one small smudge." It's a question so easy that a model can get genuinely good at it. And here's the quiet leap: a model that can reliably remove a <em>little</em> noise can be run over and over to remove a <em>lot</em>.</p>
+  <figure class="reveal"><img class="fig" src="figures/l7/l7-03-reverse-step.png" alt="Train a model to undo one step of noising"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 4 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Four · the magic</div>
+  <h2>Generate from pure noise</h2>
+  <p>So do the audacious thing. Don't start with a photo at all. Start with a fresh screen of <em>pure random static</em> — noise that was never a picture of anything — and ask the model the only question it knows: "what noise should I remove?" Take its answer, subtract it, and you have something very slightly less random. Ask again. And again. A few dozen steps later, a coherent, brand-new image you have never seen resolves out of the chaos.</p>
+  <p>Drag the slider. On the left is pure static; pull toward the right and watch a picture you never drew assemble itself out of the noise — which is, almost exactly, what the model does step by step:</p>
+  <div class="reveal" id="noisedemo" style="margin:1.8rem 0;text-align:center">
+    <canvas id="nz-canvas" width="220" height="220" style="width:230px;height:230px;border-radius:10px;image-rendering:pixelated;border:1px solid var(--line)"></canvas>
+    <div class="knobrow" style="margin-top:1.1rem"><span class="mk" style="font-size:12px;color:var(--accent)">pure noise</span><input type="range" id="nz-knob" min="0" max="100" value="0" aria-label="denoise"><span class="mk" style="font-size:12px;color:var(--faint)">clean image</span></div>
+    <div class="readout">noise remaining: <b id="nz-val">100</b>% &nbsp;<span id="nz-msg" class="mk" style="color:var(--accent)"></span></div>
+  </div>
+  <figure class="reveal"><img class="fig" src="figures/l7/l7-04-noise-to-image.png" alt="An image emerges from pure noise by denoising"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 5 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Five · why it works</div>
+  <h2>A thousand tiny, easy steps</h2>
+  <p>Step back and notice the sleight of hand. "Generate a beautiful image from nothing" is a monstrously hard problem — too hard to attack head-on. But "remove a little noise" is easy. Diffusion's whole genius is that it <em>shatters the impossible problem into thousands of trivial ones</em>, and chains them. No single step is clever. The cleverness is in the chain.</p>
+  <figure class="reveal"><img class="fig" src="figures/l7/l7-05-tiny-steps.png" alt="Break the impossible leap into many tiny easy steps"><div class="fig-missing">figure generating…</div></figure>
+  <p>There's an old line attributed to Michelangelo: the statue was already inside the marble; he just removed everything that wasn't it. Diffusion is exactly that, made mechanical. The image was always hiding in the noise, in the sense that <em>some</em> picture is consistent with any starting static — and the model's job is just to keep carving away what isn't it. (The idea, by the way, was borrowed from physics — the gentle spreading of particles, "diffusion" — by Sohl-Dickstein and colleagues in 2015, and made to sing for images by Ho and colleagues in 2020.)</p>
+  <figure class="reveal"><img class="fig" src="figures/l7/l7-06-sculptor.png" alt="The statue was always in the marble"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 6 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Six · images</div>
+  <h2>This is how AI paints</h2>
+  <p>This isn't a toy. Stable Diffusion, Midjourney, DALL·E, Imagen — every one of those tools that paints from a text prompt is, under the hood, doing exactly this: starting from noise and denoising its way to a picture, gently steered at each step by your words. (And remember Lecture 5 — the cleverest versions do all this denoising inside a compressed <em>latent</em> space, so expressivity and compression and reversal all stack together.)</p>
+  <figure class="reveal"><img class="fig" src="figures/l7/l7-07-image-models.png" alt="Stable Diffusion, Midjourney and DALL-E all denoise images out of noise"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 7 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Seven · the twist</div>
+  <h2>Now do it to language</h2>
+  <p>Here is where it gets genuinely surprising. Almost every language model you've used writes the way you'd expect — left to right, one word at a time, each token committed before the next is chosen. It's called autoregressive, and it's sequential by nature: to write the hundredth word, you must first write the ninety-nine before it.</p>
+  <figure class="reveal"><img class="fig" src="figures/l7/l7-08-autoregressive-vs-diffusion.png" alt="Autoregressive writes one token at a time; diffusion refines the whole sentence at once"><div class="fig-missing">figure generating…</div></figure>
+  <p>Diffusion says: why one at a time? Corrupt a sentence not with blur but by <em>masking</em> — replace words with blanks until the whole thing is gibberish — and train a model to fill them all back in. Then generate by starting with a sentence that is <em>entirely</em> blanks and refining the whole thing at once, over a few passes: a rough draft of every word simultaneously, then sharper, then sharper, like a Polaroid developing. The sentence comes into focus all at once instead of crawling out word by word.</p>
+  <figure class="reveal"><img class="fig" src="figures/l7/l7-09-text-diffusion.png" alt="Text diffusion: start with masked tokens and refine the whole sequence"><div class="fig-missing">figure generating…</div></figure>
+  <p>This is exactly what diffusion language models like <em>Mercury</em> (from Inception Labs) and the open <em>LLaDA</em> do — and because they generate every token in parallel rather than one-by-one, they can be several times faster than a normal LLM at the same quality. The same destroy-and-reverse trick that paints foxes now writes paragraphs. Whoever first looked at a left-to-right model and thought "what if a sentence could develop like a photograph instead" deserves a great deal of credit.</p>
+  <figure class="reveal"><img class="fig" src="figures/l7/l7-10-mercury.png" alt="Diffusion language models like Mercury generate all tokens in parallel, much faster"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 8 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Eight · and beyond</div>
+  <h2>Video, music, and new medicines</h2>
+  <p>Once you have the trick, it spreads everywhere, because almost everything can be corrupted and un-corrupted. <em>Video</em>: denoise across space and time at once, and a whole clip emerges from spacetime static — this is the engine behind Sora-style video models. <em>Audio</em>: denoise a sound into music or speech. And most strikingly, <em>molecules</em>: scatter atoms at random and denoise them into a valid, structured protein or drug candidate — diffusion is now a serious tool in designing new medicines.</p>
+  <figure class="reveal"><img class="fig" src="figures/l7/l7-11-video-diffusion.png" alt="Video diffusion denoises across space and time"><div class="fig-missing">figure generating…</div></figure>
+  <figure class="reveal"><img class="fig" src="figures/l7/l7-12-audio-diffusion.png" alt="Diffusion generates audio and music"><div class="fig-missing">figure generating…</div></figure>
+  <figure class="reveal"><img class="fig" src="figures/l7/l7-13-molecule-diffusion.png" alt="Diffusion denoises random atoms into a real molecule"><div class="fig-missing">figure generating…</div></figure>
+  <p>Image, text, video, audio, molecules — wildly different worlds, one identical move: corrupt, learn to reverse, denoise from noise.</p>
+  <figure class="reveal"><img class="fig" src="figures/l7/l7-14-many-fields.png" alt="One denoising trick generates images, text, video, audio, and molecules"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 9 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Nine · the non-intuition</div>
+  <h2>Creation runs through destruction</h2>
+  <p>Sit with how strange this really is, because it's worth it. The most natural assumption in the world is that creating and destroying are opposites — that to build something you do the reverse of tearing it down. Diffusion quietly overturns that. Here, the <em>only</em> way the machine learns to create is by first learning, in exquisite gradual detail, how to destroy — and then running that destruction backward.</p>
+  <div class="thesis">
+    <div class="t">the unintuitive heart of it</div>
+    <p>You cannot teach a machine to create from nothing. But you can teach it to undo a destruction you fully understand. So you destroy on purpose, carefully, reversibly — and creation falls out as destruction, played in reverse.</p>
+  </div>
+  <figure class="reveal"><img class="fig" src="figures/l7/l7-15-creation-through-destruction.png" alt="Creation through destruction: a loop from image to noise to new image"><div class="fig-missing">figure generating…</div></figure>
+</section>
+
+<!-- 10 -->
+<section class="wrap reveal">
+  <div class="sec-kicker">Ten · the move to keep</div>
+  <h2>Don't build it in one shot</h2>
+  <p>So here is the model to carry away. When you face a generation problem that feels impossibly hard to do in one go — make an image, write a passage, fold a protein — resist the urge to build it directly. Ask instead: can I define a gentle, reversible way to <em>destroy</em> the finished thing? Because if you can corrupt it step by step, you can train a model to walk those steps backward — and let the hard act of creation fall out as a long chain of easy, tiny reversals.</p>
+  <figure class="reveal"><img class="fig" src="figures/l7/l7-16-takeaway.png" alt="When creation is too hard, corrupt, reverse, and denoise from noise"><div class="fig-missing">figure generating…</div></figure>
+  <div class="takeaway">
+    <div class="t">the move to keep</div>
+    <p>When creating something is too hard to do in one shot, define a gradual, reversible corruption of it instead — then train a model to undo a single step, and run that undo from pure noise. Images, language, video, molecules: creation, again and again, turns out to be destruction played backward.</p>
+  </div>
+</section>
+
+<hr class="rule" style="margin-top:2rem">
+<footer class="wrap reveal">
+  <div class="next">Next time — Pit Two Systems Against Each Other.</div>
+  <div class="sig">Reverse the Corruption · Lecture Seven</div>
+</footer>
+
+<script>
+  var bar=document.getElementById('bar');
+  function onScroll(){var h=document.documentElement;bar.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';}
+  document.addEventListener('scroll',onScroll,{passive:true});onScroll();
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:0.08,rootMargin:'0px 0px -5% 0px'});
+  document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});
+  document.querySelectorAll('img.fig').forEach(function(img){img.addEventListener('error',function(){img.style.display='none';var p=img.nextElementSibling;if(p)p.style.display='block';});});
+  // interactive: a picture emerging from noise
+  (function(){
+    var cv=document.getElementById('nz-canvas'); if(!cv)return;
+    var ctx=cv.getContext('2d'); var G=44, cs=cv.width/G;
+    var img=[], nz=[], seed=99173;
+    function rnd(){seed=(seed*1103515245+12345)&0x7fffffff;return seed/0x7fffffff;}
+    for(var y=0;y<G;y++){img.push([]);nz.push([]);
+      for(var x=0;x<G;x++){
+        var X=(x/(G-1))*2.8-1.4, Y=1.36-(y/(G-1))*2.8;
+        var h=Math.pow(X*X+Y*Y-1,3)-X*X*Y*Y*Y;   // heart curve
+        img[y].push(h<=0?1:0); nz[y].push(rnd());
+      }}
+    var knob=document.getElementById('nz-knob'),val=document.getElementById('nz-val'),msg=document.getElementById('nz-msg');
+    function draw(){
+      var clean=+knob.value/100, p=1-clean;
+      for(var y=0;y<G;y++)for(var x=0;x<G;x++){
+        var isImg=img[y][x];
+        var ir=isImg?192:250, ig=isImg?57:250, ib=isImg?43:250;
+        var g=Math.floor(nz[y][x]*255);
+        ctx.fillStyle='rgb('+Math.round(ir*(1-p)+g*p)+','+Math.round(ig*(1-p)+g*p)+','+Math.round(ib*(1-p)+g*p)+')';
+        ctx.fillRect(x*cs,y*cs,cs+1,cs+1);
+      }
+      val.textContent=Math.round(p*100);
+      msg.textContent = p<0.14 ? '✓ a picture appears!' : '';
+    }
+    knob.addEventListener('input',draw); knob.value=0; draw();
+  })();
+</script>
+</body>
+</html>
